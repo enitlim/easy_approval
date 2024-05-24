@@ -2,10 +2,168 @@ import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
-
+import SummaryCard from "./components/SummaryCard";
+import { Button } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { auth, db } from "@/firebase/SettingFirebase";
+import { signOut } from "firebase/auth";
 const inter = Inter({ subsets: ["latin"] });
+import { useSelector, useDispatch } from "react-redux";
+import { doc, onSnapshot } from "firebase/firestore";
+import NoteTable from "./components/noteTable";
+import Link from "next/link";
 
 export default function Home() {
+  const { userData } = useSelector((state) => state.user);
+  console.log("User Data", userData);
+  const [noteData, setNoteData] = useState(null); // All Notes
+  const [pendingNoteData, setpendingNoteData] = useState([]);
+  const [approvedNoteData, setapprovedNoteData] = useState([]);
+  const [totalNoteData, settotalNoteData] = useState([]);
+  const [FY, setFY] = useState(null);
+  const noteStatus = Object.freeze({
+    Initiated: 0,
+    CmPending: 1,
+    GmPending: 2,
+    ChPending: 3,
+    Approved: 4,
+    Rejected: -1,
+  });
+
+  useEffect(() => {
+    const FY = () => {
+      //Calculating Financial Year
+      var year;
+      var dateNote = new Date();
+      var month = dateNote.getMonth() + 1;
+      if (month < 4) {
+        year = dateNote.getFullYear() - 1 + "-" + dateNote.getFullYear();
+      } else {
+        year = dateNote.getFullYear() + "-" + (dateNote.getFullYear() + 1);
+      }
+      return year;
+    };
+    const getPendingNote = () => {
+      const curFYValue = FY();
+      setFY(curFYValue);
+      onSnapshot(
+        doc(db, "easyApproval", "dashboard", `${curFYValue}`, "totalNote"),
+        (doc) => {
+          setNoteData(doc?.data()?.notes);
+        }
+      );
+    };
+    getPendingNote(); //Getting all the Notes
+  }, [userData?.emp_id]);
+
+  useEffect(() => {
+    const Check = () => {
+      if (noteData) {
+        if (userData.designation.slice(0, 2) === "GM") {
+          setpendingNoteData(
+            noteData.filter(
+              (note) =>
+                note.level == noteStatus.GmPending &&
+                note.approvers.find(
+                  (approver) =>
+                    Object.keys(approver)[0] === userData.designation &&
+                    Object.values(approver)[0] === 0
+                )
+            )
+          );
+
+          setapprovedNoteData(
+            noteData.filter(
+              (note) =>
+                note.level == noteStatus.Approved &&
+                note.approvers.find(
+                  (approver) =>
+                    Object.keys(approver)[0] === userData.designation
+                )
+            )
+          );
+          settotalNoteData(
+            noteData.filter(
+              (note) =>
+                note.level >= noteStatus.GmPending &&
+                note.approvers.find(
+                  (approver) =>
+                    Object.keys(approver)[0] === userData.designation
+                )
+            )
+          );
+        } else if (userData.designation.slice(0, 2) === "Ch") {
+          setpendingNoteData(
+            noteData.filter((note) => note.level == noteStatus.ChPending)
+          );
+          setapprovedNoteData(
+            noteData.filter((note) => note.level == noteStatus.Approved)
+          );
+          settotalNoteData(
+            noteData.filter((note) => note.level >= noteStatus.ChPending)
+          );
+        } else if (userData.designation.slice(0, 2) === "CM") {
+          setpendingNoteData(
+            noteData.filter(
+              (note) =>
+                // console.log("filter Note: ",Object.values(note.approvers))
+                // console.log(" Note Level : ",note.level )
+                note.level == noteStatus.CmPending &&
+                note.approvers.find(
+                  (approver) =>
+                    Object.keys(approver)[0] === userData.designation &&
+                    Object.values(approver)[0] === 0
+                 
+                )
+            )
+          );
+          setapprovedNoteData(
+            noteData.filter(
+              (note) =>
+                note.level == noteStatus.Approved &&
+                note.approvers.find(
+                  (approver) =>
+                    Object.keys(approver)[0] === userData.designation
+                )
+            )
+          );
+          settotalNoteData(
+            noteData.filter(
+              (note) =>
+                note.level >= noteStatus.CmPending &&
+                note.approvers.find(
+                  (approver) =>
+                    Object.keys(approver)[0] === userData.designation
+                )
+            )
+          );
+        } else {
+          setpendingNoteData(
+            noteData.filter(
+              (note) =>
+                note.dept == userData.userDept &&
+                note.level == noteStatus.Initiated
+            )
+          );
+          setapprovedNoteData(
+            noteData.filter(
+              (note) =>
+                note.dept == userData.userDept &&
+                note.level == noteStatus.Approved
+            )
+          );
+          settotalNoteData(
+            noteData.filter((note) => note.dept == userData.userDept)
+          );
+        }
+      }
+    };
+    Check();
+  }, [noteData]);
+  console.log("Note Data",noteData);
+  console.log("Total Data", totalNoteData);
+  console.log("Approved Data", approvedNoteData);
+  console.log("Pending Data", pendingNoteData);
   return (
     <>
       <Head>
@@ -14,101 +172,59 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={`${styles.main} ${inter.className}`}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>pages/index.js</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{" "}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
-
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
+      <h2>Home</h2>
+      <Button onClick={() => signOut(auth)}>Logout</Button>
+      {totalNoteData ? (
+        <Link
+          style={{ textDecoration: "none" }}
+          href={{
+            pathname: "/ManageNote",
+            query: {
+              notes: JSON.stringify(totalNoteData),
+              title: "Total Notes",
+              FY: FY,
+            },
+          }}
+        >
+          <SummaryCard
+            heading="Total Notes"
+            count={totalNoteData.length}
+            bgColor="lightblue"
+            // icon={StickyNote}
           />
-        </div>
+        </Link>
+      ) : null}
 
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
+      {approvedNoteData ? (
+        <Link
+          style={{ textDecoration: "none" }}
+          href={{
+            pathname: "/ManageNote",
+            query: {
+              notes: JSON.stringify(approvedNoteData),
+              title: "Approved Notes",
+              FY: FY,
+            },
+          }}
+        >
+          <SummaryCard
+            heading="Approved"
+            count={approvedNoteData.length}
+            // count="10"
+            bgColor="lightgreen"
+            // icon={CheckCircleIcon}
+          />
+        </Link>
+      ) : null}
 
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
+      {pendingNoteData ? (
+        <NoteTable
+          detail={pendingNoteData}
+          fy={FY}
+          navigation={navigation}
+          title="Pending Notes"
+        />
+      ) : null}
     </>
   );
 }
