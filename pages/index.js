@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import SummaryCard from "./components/SummaryCard";
-import { Button } from "@mui/material";
+import { Button, Fab } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { auth, db } from "@/firebase/SettingFirebase";
 import { signOut } from "firebase/auth";
@@ -12,8 +12,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { doc, onSnapshot } from "firebase/firestore";
 import NoteTable from "./components/noteTable";
 import Link from "next/link";
-
+import AddIcon from "@mui/icons-material/Add";
+import { useRouter } from "next/router";
 export default function Home() {
+  const router=useRouter();
   const { userData } = useSelector((state) => state.user);
   console.log("User Data", userData);
   const [noteData, setNoteData] = useState(null); // All Notes
@@ -225,6 +227,10 @@ export default function Home() {
           title="Pending Notes"
         />
       ) : null}
+      <Fab color="primary" aria-label="add">
+        <AddIcon onClick={()=>router.push("/addNote")
+        }/>
+      </Fab>
     </>
   );
 }

@@ -1,10 +1,10 @@
 import { Card, Typography, Table, TableHead, TableRow, TableCell,TableBody } from "@mui/material";
 import React, { useState, useEffect } from "react";
-
+import { useRouter } from "next/router";
 
 const NoteTable = ({ detail, fy, navigation, title }) => {
   // console.log('Title : ', title);
-
+const router=useRouter();
   const tableData = detail;
 
 
@@ -19,9 +19,13 @@ const NoteTable = ({ detail, fy, navigation, title }) => {
   // console.log('From - To : ', from, to);
   // console.log('No of Pages', Math.ceil(tableData.length / itemsPerPage));
  
-  const showDetail = (key) => {
-    navigation.navigate("Note Approval", { docID: key, fy: fy });
-  };
+   const showDetail = (key) => {
+     console.log(key);
+     router.push({
+       pathname: "/noteApproval",
+       query: { docID: key, fy: fy },
+     });
+   };
   return (
     <Card>
       <Typography>{title}</Typography>
@@ -42,13 +46,10 @@ const NoteTable = ({ detail, fy, navigation, title }) => {
         </TableHead>
 
         {tableData.map((item, index) => (
-          <TableRow key={item.docID} onPress={() => showDetail(item.docID)}>
+          <TableRow key={item.docID} onClick={() => showDetail(item.docID)}>
               <TableCell style={{ flex: 0.5, justifyContent: "center" }}>
                 {item.title}
               </TableCell>
-            {/* <TableCell style={{flex: 0.5, flexWrap: 'wrap'}}>
-              {item.title}
-            </TableCell> */}
             <TableCell style={{ flex: 0.1, alignContent: "flex-end" }}>
               {item.dept}
             </TableCell>

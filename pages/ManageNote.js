@@ -7,9 +7,7 @@ function ManageNote() {
     const {title, FY}=router.query;
     const noteString= router.query.notes;
     const notes=JSON.parse(noteString);
-    console.log(noteString);
-    console.log(title);
-    console.log(FY);
+
   return (
     <>
       <Typography
