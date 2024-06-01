@@ -89,14 +89,6 @@ const uploadFile = async () => {
   setModvisible(true);
   const remoteFilePath = `easyApproval/${noteID}`;
 
-  // Check if the file is a PDF
-  // if (file.type !== "application/pdf") {
-  //   console.log("Please upload a PDF file");
-  //   setdataToast("Please upload a PDF file");
-  //   settoastopen(true);
-  //   return;
-  // }
-
   const storageRef = ref(storage, `${remoteFilePath}/RemarkNote`);
   try {
     const snapshot = await uploadBytes(storageRef, file);
@@ -259,6 +251,7 @@ settoastopen(true);
 
     hideModal();
   };
+ 
   return (
     <>
       <Snackbar
@@ -268,150 +261,166 @@ settoastopen(true);
         autoHideDuration={2000}
         message={dataToast}
       />
-      <Modal
-        open={visible}
-        onClose={hideModal}
-        sx={{ backgroundColor: "white", padding: 20, margin: 20 }}
-      >
-        <Box sx={style}>
-          {Modvisible ? (
-            <Skeleton />
-          ) : type === "compliance" ? (
-            <>
-              <TextField
-                label="Type your message"
-                onChange={(text) => setRemarkText(text.target.value)}
-                variant="outlined"
-                multiline
-                maxRows={4}
-                style={{ height: 150 }}
-              />
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={setreturnTo}
-                label="Return to"
-                onChange={() => {
-                  setreturnTo(data);
-                  closeMenu();
-                }}
-              >
-                {approverList.map((data) => (
-                  <MenuItem value={data}>{data}</MenuItem>
-                ))}
-              </Select>
-              <TextField
-                style={margins}
-                disabled
-                label="Returned to "
-                value={returnTo ? returnTo : "Select whom to return"}
-              />
-              <Button
-                style={margins}
-                variant="outlined"
-                onClick={handleCompliance}
-              >
-                Send For Compliance
-              </Button>
-            </>
-          ) : type === "return" ? (
-            <>
-              <TextField
-                label="Reason for Return"
-                onChange={(text) => setRemarkText(text.target.value)}
-                variant="outlined"
-                multiline
-                maxRows={4}
-                style={{ height: 150 }}
-              />
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={setreturnTo}
-                label="Return to"
-                onChange={(event) => {
-                  setreturnTo(event.target.value);
-                  closeMenu();
-                }}
-              >
-                {approverList.map((data) => (
-                  <MenuItem value={data}>{data}</MenuItem>
-                ))}
-              </Select>
-              <TextField
-                style={margins}
-                disabled
-                label="Returned to "
-                value={returnTo ? returnTo : "Select whom to return"}
-              />
-              <Button style={margins} variant="outlined" onClick={handleReturn}>
-                Return
-              </Button>
-            </>
-          ) : type === "remark" ? (
-            <>
-              <TextField
-                label="Remarks"
-                onChange={(text) => setRemarkText(text.target.value)}
-                variant="outlined"
-                multiline
-                maxRows={4}
-                style={{ height: 150 }}
-              />
-              <TextField type="file" onChange={onFileChange}/>
-          
-              <Button
-                style={{ marginTop: 10 }}
-                buttonColor="lightgreen"
-                variant="contained"
-                onClick={handleRemark}
-              >
-                Submit
-              </Button>
-            </>
-          ) : type === "reject" ? (
-            <>
-              <TextField
-                label="Rejection Remarks"
-                onChange={(text) => setRemarkText(text.target.value)}
-                variant="outlined"
-                multiline
-                maxRows={4}
-                style={{ height: 150 }}
-              />
-              <Button
-                style={{ marginTop: 10 }}
-                buttonColor="red"
-                variant="contained"
-                disabled={remarkText.length > 0 ? false : true}
-                onClick={handleReject}
-              >
-                Submit
-              </Button>
-            </>
-          ) : (
-            <>
-              <TextField
-                label="Remarks"
-                onChange={(text) => setRemarkText(text.target.value)}
-                variant="outlined"
-                multiline
-                maxRows={4}
-                style={{ height: 150 }}
-              />
-              <Button
-                style={{ marginTop: 10 }}
-                buttonColor="lightgreen"
-                variant="contained"
-                disabled={remarkText.length > 0 ? false : true}
-                onClick={handleRecommended}
-              >
-                Submit
-              </Button>
-            </>
-          )}
-        </Box>
-      </Modal>
+      <Box sx={{ width: "200px" }}>
+        <Modal open={visible} onClose={hideModal}>
+          <Box sx={style}>
+            {Modvisible ? (
+              <Skeleton />
+            ) : type === "compliance" ? (
+              <>
+                <TextField
+                  label="Type your message"
+                  onChange={(text) => setRemarkText(text.target.value)}
+                  variant="outlined"
+                  multiline
+                  maxRows={4}
+                  style={{ height: 150 }}
+                />
+                <Select
+                fullWidth
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  value={setreturnTo}
+                  label="Return to"
+                  onChange={() => {
+                    setreturnTo(data);
+                    closeMenu();
+                  }}
+                >
+                  {approverList.map((data) => (
+                    <MenuItem value={data}>{data}</MenuItem>
+                  ))}
+                </Select>
+                <TextField
+                  fullWidth
+                  rows={4}
+                  style={margins}
+                  disabled
+                  label="Returned to "
+                  value={returnTo ? returnTo : "Select whom to return"}
+                />
+                <Button
+                  style={margins}
+                  variant="outlined"
+                  onClick={handleCompliance}
+                >
+                  Send For Compliance
+                </Button>
+              </>
+            ) : type === "return" ? (
+              <>
+                <TextField
+                  fullWidth
+                  rows={4}
+                  label="Reason for Return"
+                  onChange={(text) => setRemarkText(text.target.value)}
+                  variant="outlined"
+                  multiline
+                  maxRows={4}
+                  style={{ height: 150 }}
+                />
+                <Select
+                fullWidth
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  value={setreturnTo}
+                  label="Return to"
+                  onChange={(event) => {
+                    setreturnTo(event.target.value);
+                    closeMenu();
+                  }}
+                >
+                  {approverList.map((data) => (
+                    <MenuItem value={data}>{data}</MenuItem>
+                  ))}
+                </Select>
+                <TextField
+                  fullWidth
+                  rows={4}
+                  style={margins}
+                  disabled
+                  label="Returned to "
+                  value={returnTo ? returnTo : "Select whom to return"}
+                />
+                <Button
+                  style={margins}
+                  variant="outlined"
+                  onClick={handleReturn}
+                >
+                  Return
+                </Button>
+              </>
+            ) : type === "remark" ? (
+              <>
+                <TextField
+                  fullWidth
+                  rows={4}
+                  label="Remarks"
+                  onChange={(text) => setRemarkText(text.target.value)}
+                  variant="outlined"
+                  multiline
+                  maxRows={4}
+                  style={{ height: 150 }}
+                />
+                <TextField type="file" onChange={onFileChange} />
+
+                <Button
+                  style={{ marginTop: 10 }}
+                  buttonColor="lightgreen"
+                  variant="contained"
+                  onClick={handleRemark}
+                >
+                  Submit
+                </Button>
+              </>
+            ) : type === "reject" ? (
+              <>
+                <TextField
+                  fullWidth
+                  rows={4}
+                  label="Rejection Remarks"
+                  onChange={(text) => setRemarkText(text.target.value)}
+                  variant="outlined"
+                  multiline
+                  maxRows={4}
+                  style={{ height: 150 }}
+                />
+                <Button
+                  style={{ marginTop: 10 }}
+                  buttonColor="red"
+                  variant="contained"
+                  disabled={remarkText.length > 0 ? false : true}
+                  onClick={handleReject}
+                >
+                  Submit
+                </Button>
+              </>
+            ) : (
+              <>
+                <TextField
+                  fullWidth
+                  rows={4}
+                  label="Remarks"
+                  onChange={(text) => setRemarkText(text.target.value)}
+                  variant="outlined"
+                  multiline
+                  maxRows={4}
+                  style={{ height: 150 }}
+                />
+                <Button
+                  style={{ marginTop: 10 }}
+                  buttonColor="lightgreen"
+                  variant="contained"
+                  disabled={remarkText.length > 0 ? false : true}
+                  onClick={handleRecommended}
+                >
+                  Submit
+                </Button>
+              </>
+            )}
+          </Box>
+        </Modal>
+      </Box>
     </>
   );
 };
@@ -419,20 +428,19 @@ settoastopen(true);
     marginTop: 10,
     marginBottom: 10,
   }
-  const TextInput= {
-    height: 150,
-    marginTop: 10,
-    marginBottom: 10,
-  }
-  const style = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 400,
-    bgcolor: "background.paper",
-    border: "2px solid #000",
-    boxShadow: 24,
-    p: 4,
-  };
+ 
+   const style = {
+     position: "absolute",
+     top: "45%",
+     left: "50%",
+     transform: "translate(-50%, -50%)",
+     width: "75%",
+     bgcolor: "background.paper",
+     border: "2px solid grey",
+     boxShadow: 24,
+     borderRadius:8,
+     p: 4,
+     maxHeight: "90vh", // Limit the maximum height of the modal
+     overflowY: "auto",
+   };
 export default NoteModal;

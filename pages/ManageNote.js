@@ -20,7 +20,7 @@ function ManageNote() {
       >
         {title}
       </Typography>
-      <NoteTable detail={notes} fy={FY} navigation={navigation} title={title} />
+      <NoteTable detail={notes} fy={FY}  title={title} />
     </>
   );
 }

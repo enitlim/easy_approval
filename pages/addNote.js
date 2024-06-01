@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
-import { doc, setDoc,addDoc, getDoc, collection } from "firebase/firestore";
+import { doc, setDoc, addDoc, getDoc, collection } from "firebase/firestore";
 import { uploadBytes, ref, getDownloadURL } from "firebase/storage";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useRouter } from "next/router";
 import { formatDate } from "./others/utils";
 import { db, storage } from "@/firebase/SettingFirebase";
 import {
   Autocomplete,
+  Box,
   Button,
   Checkbox,
   MenuItem,
@@ -24,6 +27,7 @@ const icon = <CheckBoxOutlineBlankOutlined fontSize="small" />;
 const checkedIcon = <CheckBox fontSize="small" />;
 const checkedIcon2 = <CheckBox fontSize="small" />;
 export default function AddNote() {
+  const router=useRouter();
   const approversList = [
     "Chairman",
     "GM - I",
@@ -34,7 +38,7 @@ export default function AddNote() {
   ];
 
   const { userData } = useSelector((state) => state.user);
-//   console.log("userData: ", userData);
+  //   console.log("userData: ", userData);
 
   const userId = userData?.emp_id;
   const userDept = userData?.userDept;
@@ -43,7 +47,7 @@ export default function AddNote() {
   const [file, setFile] = useState(null);
 
   const [selectedRecommenders, setSelectedRecommenders] = useState([]);
-  const [selectedApprover, setSelectedApprover] = useState("");
+  const [selectedApprover, setSelectedApprover] = useState("Chairman");
   const [selectedGM, setSelectedGM] = useState([]);
   const [pdfNote, setPdfNote] = useState(null);
   const [title, setTitle] = useState("");
@@ -61,11 +65,6 @@ export default function AddNote() {
     padding: 20,
     margin: 20,
     color: "black",
-  };
-
-  const onDismissSnackBar = () => {
-    setVisible(false);
-    navigation.navigate("Dashboard");
   };
 
   useEffect(() => {
@@ -106,34 +105,32 @@ export default function AddNote() {
       let docID = userDept;
       try {
         const curFYValue = FY();
-                console.log("Before Query: ", curFYValue);
-                console.log("USer Dept: ", userDept);
+        console.log("Before Query: ", curFYValue);
+        console.log("USer Dept: ", userDept);
 
         const querySnapshot = await getDoc(
           doc(db, "easyApproval", "dashboard", `${curFYValue}`, `${userDept}`)
         );
         console.log("After Query");
-        console.log("Query Snapshot: ",querySnapshot.data());
+        console.log("Query Snapshot: ", querySnapshot.data());
         // Check if there are any documents returned by the query
         if (!querySnapshot.empty) {
-            const data = querySnapshot.data();
-             if (data && data.count) {
-               countValue = Number(data.count) + 1;
-               docID = doc.id;
-             }
-        
+          const data = querySnapshot.data();
+          if (data && data.count) {
+            countValue = Number(data.count) + 1;
+            docID = doc.id;
+          }
         }
       } catch (error) {
         console.error("Error fetching count:", error);
       }
       setnotecount(countValue);
       setDocID(docID);
-      
     };
 
     fetchData();
   }, []);
-  console.log('NoteCount:', notecount);
+  console.log("NoteCount:", notecount);
   // console.log('FY:', FY);
   useEffect(() => {
     if (notecount && FY) {
@@ -153,8 +150,10 @@ export default function AddNote() {
   // console.log('DocID : ', docID);
   const onFileChange = async (e) => {
     setFile(e.target.files[0]);
-  }
+  };
   const uploadDocument = async (noteType) => {
+    setModvisible(true)
+    
     const remoteFilePath = `easyApproval/${noteID}`;
 
     const storageRef = ref(storage, `${remoteFilePath}/${noteType}`);
@@ -176,82 +175,35 @@ export default function AddNote() {
       setPdfNote(url);
 
       setModvisible(false);
-      setdataToast("File is loaded successfully");
-      settoastopen(true);
+      toast.success(" Uploaded !", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
     } catch (error) {
+      setModvisible(false);
       console.log(error.message);
+      toast.error(`${error.message}`, {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
     }
   };
 
-  const  handleUpload = async (noteType) => {
+  const submitAllData = async () => {
     setModvisible(true);
 
-    try {
-      const storageRef = storage().ref();
-      const remoteFilePath = `easyApproval/${noteID}`;
-      if (noteType === "mainNote") {
-        const documentRef = storageRef.child(`${remoteFilePath}/MainNote`);
-        // Upload the blob to Firebase Storage using put method
-        await documentRef.put(blob);
-        const url = await documentRef.getDownloadURL();
-        setPdfNote(url);
-      } else if (noteType === "noteAnnexure") {
-        const documentRef = storageRef.child(`${remoteFilePath}/Annexure`);
-        // Upload the blob to Firebase Storage using put method
-        await documentRef.put(blob);
-        const url = await documentRef.getDownloadURL();
-        setReference(url);
-      } else {
-        const documentRef = storageRef.child(`${remoteFilePath}/Reference`);
-        // Upload the blob to Firebase Storage using put method
-        await documentRef.put(blob);
-        const url = await documentRef.getDownloadURL();
-        setAnnexure(url);
-      }
-      setModvisible(false);
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          const toastId = "toast" + id;
-          return (
-            <CustomToast
-              toastId={toastId}
-              action="success"
-              variant="solid"
-              title="Uploaded"
-              message="File is loaded successfully"
-            />
-          );
-        },
-      });
-      console.log(`Document ${name} uploaded successfully.`);
-    } catch (error) {
-      // console.error('Error uploading document Final:', error);
-      setModvisible(false);
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          const toastId = "toast" + id;
-          return (
-            <CustomToast
-              toastId={toastId}
-              action="error"
-              variant="solid"
-              title="Error Uploading"
-              // message={error}
-              message="Error uploading document"
-            />
-          );
-        },
-      });
-    }
-  };
-
-  const submitData = async () => {
-    console.log("Title: ",title);
-    console.log("Recommenders: ",selectedRecommenders);
-    console.log("Approver: ",selectedApprover);
-    console.log("PDF Note: ",pdfNote);
     if (
       title &&
       selectedRecommenders.length > 0 &&
@@ -302,127 +254,117 @@ export default function AddNote() {
           },
         ],
       };
-      console.log(submitData);
+      // console.log(submitData);
       // return;
       try {
         const saveDoc = await addDoc(
           collection(db, "easyApproval", "FY", `${FY}`),
           submitData
         );
-                      console.log("Main Doc Saved");
-                      console.log(saveDoc);
 
         if (saveDoc) {
-          // console.log('Doc Detail: ', saveDoc);
-          console.log('Doc Id: ', saveDoc.id);
-          const updateCount = await setDoc(
-            doc(db, "easyApproval", "dashboard", `${FY}`, `${docID}`),
+          await setDoc(
+            doc(db, "easyApproval", "dashboard", `${FY}`, `${userDept}`),
             {
               count: notecount,
               dept: userDept,
             }
           );
 
-          if (updateCount) {
-            let newTotalNotes = [];
-
-            //fetch the current Detail form this document
-            try {
-              let totalNoteData = await getDoc(
-                doc(db, "easyApproval", "dashboard", `${FY}`, "totalNote")
-              );
-              console.log("Main Doc Saved");
-              // console.log('Pending Note Date : => ', pendingNoteData.data().notes);
-              newTotalNotes = totalNoteData.data().notes;
-              // console.log('Pending Note Date : => ', newTotalNotes);
-            } catch (error) {
-              console.log(error.message);
-            }
-
-            const totalNote = {
-              notes: [
-                ...newTotalNotes,
-                {
-                  title: title,
-                  docID: saveDoc.id,
-                  dept: userDept,
-                  createdOn: CreationDate,
-                  level: 1,
-                  approvers: approvers,
-                },
-              ],
-            };
-
-            //Append the doc with new data
-            await setDoc(
-              doc(db, "easyApproval", "dashboard", `${FY}`, "totalNote"),
-              totalNote
+          let newTotalNotes = [];
+          console.log("Getting the Total Notes");
+          //fetch the current Detail form this document
+          try {
+            let totalNoteData = await getDoc(
+              doc(db, "easyApproval", "dashboard", `${FY}`, "totalNote")
             );
-              console.log("Dashboard Doc Saved");
-
-            //add to the total Note List
-            console.log('Document saved');
-            setModvisible(false);
-            setVisible(true);
+            console.log("Main Doc Saved");
+            // console.log('Pending Note Date : => ', pendingNoteData.data().notes);
+            newTotalNotes = totalNoteData.data().notes;
+            console.log("Pending Note Date : => ", newTotalNotes);
+          } catch (error) {
+            console.log(error.message);
           }
+
+          const totalNote = {
+            notes: [
+              ...newTotalNotes,
+              {
+                title: title,
+                docID: saveDoc.id,
+                dept: userDept,
+                createdOn: CreationDate,
+                level: 1,
+                approvers: approvers,
+              },
+            ],
+          };
+
+          //Append the doc with new data
+          await setDoc(
+            doc(db, "easyApproval", "dashboard", `${FY}`, "totalNote"),
+            totalNote
+          );
+
+          //add to the total Note List
+          console.log("Document saved");
+          setModvisible(false);
+
+          toast.success("Approval is Raised !", {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+          setTimeout(() => {    router.push("/");
+}, 5000);
         }
       } catch (error) {
-        console.log(error.message);
+        // console.log(error.message);
+        setModvisible(false);
+        toast.success(`${error.message} !`, {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
       }
     } else {
-        console.log("Unable to Submit");
-    //   toast.show({
-    //     placement: "top",
-    //     render: ({ id }) => {
-    //       const toastId = "toast" + id;
-    //       return (
-    //         <CustomToast
-    //           toastId={toastId}
-    //           action="error"
-    //           variant="solid"
-    //           title="Unable to Submit"
-    //           message="Please fill up all required field"
-    //         />
-    //       );
-    //     },
-    //   });
+       setModvisible(false);
+       toast.warning("Fill All data", {
+         position: "top-center",
+         autoClose: 5000,
+         hideProgressBar: false,
+         closeOnClick: true,
+         pauseOnHover: true,
+         draggable: true,
+         progress: undefined,
+         theme: "colored",
+       });
     }
   };
   return (
     <div style={container}>
-      {/* <Modal
-        open={Modvisible}
-        onClose={()=>setModvisible(false)}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Skeleton />
-        <Typography style={{ color: "black", textAlign: "center" }}>
-          Uploading...
-        </Typography>
-      </Modal> */}
+      <Modal open={Modvisible} onClose={() => setModvisible(false)}>
+        <Box sx={modalStyle}>
+          <Typography variant="h4">Uploading</Typography>
+          <Skeleton></Skeleton>
+        </Box>
+      </Modal>
 
-      <Snackbar
-        style={{ backgroundColor: "lightgreen" }}
-        elevation="5"
-        duration={2000}
-        visible={visible}
-        onDismiss={onDismissSnackBar}
-      >
-        <Typography style={{ color: "black" }}>
-          {" "}
-          New Note is successfully added
-        </Typography>
-      </Snackbar>
-      {/* <TextField
-          mode="outlined"
-          label="Department "
-          value={userDept}
-          editable={false}
-          // onChangeText={dept => setDept(dept)}
-        /> */}
+      <ToastContainer/>
+    
+      <Typography variant="h4">Add Note {userDept}</Typography>
       <TextField
-      fullWidth
+        fullWidth
         mode="outlined"
         label="Note Title *"
         //   value={title}
@@ -463,13 +405,9 @@ export default function AddNote() {
             {option.name}
           </li>
         )}
-        style={{ width: 500 }}
+        style={{ width: "100%", marginBottom: "10px" }}
         renderInput={(params) => (
-          <TextField
-            {...params}
-            label="General Manager"
-            placeholder="Add More"
-          />
+          <TextField {...params} label="Chief Manager" placeholder="Add More" />
         )}
       />
       <Autocomplete
@@ -492,7 +430,7 @@ export default function AddNote() {
             {option.name}
           </li>
         )}
-        style={{ width: 500 }}
+        style={{ width: "100%", marginBottom: "10px" }}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -501,8 +439,6 @@ export default function AddNote() {
           />
         )}
       />
-
-      <Typography style={{ color: "black" }}>Select General Manager</Typography>
 
       <Stack space="md">
         <TextField
@@ -536,7 +472,11 @@ export default function AddNote() {
           Upload Reference
         </Button>
 
-        <Button mode="elevated" onClick={submitData} buttonColor="lightgreen">
+        <Button
+          variant="contained"
+          onClick={submitAllData}
+          buttonColor="lightgreen"
+        >
           Submit
         </Button>
       </Stack>
@@ -572,3 +512,17 @@ const cmlist = [
   { name: "CM - BO", id: "CM - BO" },
   { name: "CM - PnD", id: "CM - PnD" },
 ];
+   const modalStyle = {
+     position: "absolute",
+     top: "45%",
+     left: "50%",
+     transform: "translate(-50%, -50%)",
+     width: "75%",
+     bgcolor: "background.paper",
+     border: "2px solid grey",
+     boxShadow: 24,
+     borderRadius: 8,
+     p: 4,
+     maxHeight: "90vh",
+     overflowY: "auto",
+   };

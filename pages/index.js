@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import SummaryCard from "./components/SummaryCard";
-import { Button, Fab } from "@mui/material";
+import { Box, Button, Fab, Stack } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { auth, db } from "@/firebase/SettingFirebase";
 import { signOut } from "firebase/auth";
@@ -15,7 +15,7 @@ import Link from "next/link";
 import AddIcon from "@mui/icons-material/Add";
 import { useRouter } from "next/router";
 export default function Home() {
-  const router=useRouter();
+  const router = useRouter();
   const { userData } = useSelector((state) => state.user);
   console.log("User Data", userData);
   const [noteData, setNoteData] = useState(null); // All Notes
@@ -115,7 +115,6 @@ export default function Home() {
                   (approver) =>
                     Object.keys(approver)[0] === userData.designation &&
                     Object.values(approver)[0] === 0
-                 
                 )
             )
           );
@@ -162,7 +161,7 @@ export default function Home() {
     };
     Check();
   }, [noteData]);
-  console.log("Note Data",noteData);
+  console.log("Note Data", noteData);
   console.log("Total Data", totalNoteData);
   console.log("Approved Data", approvedNoteData);
   console.log("Pending Data", pendingNoteData);
@@ -174,63 +173,77 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <h2>Home</h2>
-      <Button onClick={() => signOut(auth)}>Logout</Button>
-      {totalNoteData ? (
-        <Link
-          style={{ textDecoration: "none" }}
-          href={{
-            pathname: "/ManageNote",
-            query: {
-              notes: JSON.stringify(totalNoteData),
-              title: "Total Notes",
-              FY: FY,
-            },
-          }}
-        >
-          <SummaryCard
-            heading="Total Notes"
-            count={totalNoteData.length}
-            bgColor="lightblue"
-            // icon={StickyNote}
-          />
-        </Link>
-      ) : null}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignContent: "space-between",
+        }}
+      >
+        <h2>Home</h2>
+        <Button onClick={() => signOut(auth)}>Logout</Button>
+      </Box>
+      <Stack
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        spacing={2}
+      >
+        {totalNoteData ? (
+          <Link
+            style={{ textDecoration: "none" }}
+            href={{
+              pathname: "/ManageNote",
+              query: {
+                notes: JSON.stringify(totalNoteData),
+                title: "Total Notes",
+                FY: FY,
+              },
+            }}
+          >
+            <SummaryCard
+              heading="Total Notes"
+              count={totalNoteData.length}
+              bgColor="lightblue"
+              // icon={StickyNote}
+            />
+          </Link>
+        ) : null}
 
-      {approvedNoteData ? (
-        <Link
-          style={{ textDecoration: "none" }}
-          href={{
-            pathname: "/ManageNote",
-            query: {
-              notes: JSON.stringify(approvedNoteData),
-              title: "Approved Notes",
-              FY: FY,
-            },
-          }}
-        >
-          <SummaryCard
-            heading="Approved"
-            count={approvedNoteData.length}
-            // count="10"
-            bgColor="lightgreen"
-            // icon={CheckCircleIcon}
-          />
-        </Link>
-      ) : null}
+        {approvedNoteData ? (
+          <Link
+            style={{ textDecoration: "none" }}
+            href={{
+              pathname: "/ManageNote",
+              query: {
+                notes: JSON.stringify(approvedNoteData),
+                title: "Approved Notes",
+                FY: FY,
+              },
+            }}
+          >
+            <SummaryCard
+              heading="Approved"
+              count={approvedNoteData.length}
+              // count="10"
+              bgColor="lightgreen"
+              // icon={CheckCircleIcon}
+            />
+          </Link>
+        ) : null}
 
-      {pendingNoteData ? (
-        <NoteTable
-          detail={pendingNoteData}
-          fy={FY}
-          navigation={navigation}
-          title="Pending Notes"
-        />
-      ) : null}
-      <Fab color="primary" aria-label="add">
-        <AddIcon onClick={()=>router.push("/addNote")
-        }/>
-      </Fab>
+        {pendingNoteData ? (
+          <NoteTable
+            detail={pendingNoteData}
+            fy={FY}
+            title="Pending Notes"
+          />
+        ) : null}
+        <Fab color="primary" aria-label="add">
+          <AddIcon onClick={() => router.push("/addNote")} />
+        </Fab>
+      </Stack>
     </>
   );
 }

@@ -5,10 +5,12 @@ import { db } from "@/firebase/SettingFirebase";
 import NoteModal from "./components/noteModal";
 import { doc, onSnapshot, getDoc, setDoc } from "firebase/firestore";
 import { useSelector, useDispatch } from "react-redux";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 // import { mergePDFs } from "../../../utils";
 import { useRouter } from "next/router";
 import { Button, Divider, Modal, Skeleton, Stack, Typography } from "@mui/material";
-const NoteApproval = ({ navigation, route }) => {
+const NoteApproval = () => {
   const router = useRouter();
   const { userData } = useSelector((state) => state.user);
   const [screenToggle, setScreenToggle] = useState(true);
@@ -298,6 +300,41 @@ const NoteApproval = ({ navigation, route }) => {
           });
           if (noteApproved) {
             //Update the PDF code here
+            //Check from here
+            const downloadMergedPdf = async (data) => {
+              try {
+                const mergedPdfBase64 = await mergePDFs(
+                  data.note,
+                  data.annexure,
+                  data.reference,
+                  data.approver,
+                  data.noteId,
+                  data.notetitle,
+                  data.notedate,
+                  data.status
+                );
+
+                const link = document.createElement("a");
+                link.href = `data:application/pdf;base64,${mergedPdfBase64}`;
+                link.download = "merged.pdf";
+                link.click();
+              } catch (error) {
+                console.error("Error:", error);
+              }
+            };
+            // Example usage
+            const data = {
+              note: "note-url",
+              annexure: "annexure-url",
+              reference: "reference-url",
+              approver: approverData,
+              noteId: "noteId",
+              notetitle: "noteTitle",
+              notedate: "noteDate",
+              status: "status",
+            };
+
+            downloadMergedPdf(data);
             // let approvedPdf = await mergePDFs(
             //   docDetails.notefile,
             //   docDetails.noteannex,
@@ -420,7 +457,7 @@ const NoteApproval = ({ navigation, route }) => {
       } catch (error) {
         console.log("Encountered error", error.message);
       }
-      //Updating the Notes Document
+      //Updating the Main Notes Document
       try {
         await setDoc(
           doc(db, "easyApproval", "FY", `${fy}`, `${docID}`),
@@ -428,21 +465,42 @@ const NoteApproval = ({ navigation, route }) => {
         );
 
         console.log("Updated Successfully");
+         toast.success(" Updated Successfully!", {
+           position: "top-center",
+           autoClose: 5000,
+           hideProgressBar: false,
+           closeOnClick: true,
+           pauseOnHover: true,
+           draggable: true,
+           progress: undefined,
+           theme: "colored",
+         });
       } catch (error) {
+
         console.log("Encountered error", error.message);
-      }
+ toast.error(`Error: ${error.message}`, {
+   position: "top-center",
+   autoClose: 5000,
+   hideProgressBar: false,
+   closeOnClick: true,
+   pauseOnHover: true,
+   draggable: true,
+   progress: undefined,
+   theme: "colored",
+ });      }
       setModvisible(false);
     }
   };
   // console.log('Showbar', showbar);
   return (
-    <div style={{ flex: 1 }}>
+    <div>
       <Modal visible={Modvisible} onClose={() => Modvisible(false)}>
         {/* <Skeleton variant="circilar" width={20} height={20} /> */}
         <Typography style={{ color: "black", textAlign: "center" }}>
           Updating...
         </Typography>
       </Modal>
+      <ToastContainer />
 
       {noteApprover ? (
         <NoteModal
@@ -509,7 +567,7 @@ const NoteApproval = ({ navigation, route }) => {
                 style={{ justifyContent: "space-evenly" }}
               >
                 <Button
-                  mode="contained"
+                  variant="contained"
                   buttonColor="lightblue"
                   onClick={() => showModal("return", "Return")}
                 >
@@ -517,7 +575,7 @@ const NoteApproval = ({ navigation, route }) => {
                 </Button>
                 {userData.designation === "Chairman" ? (
                   <Button
-                    mode="contained"
+                    variant="contained"
                     buttonColor="red"
                     onClick={() => showModal("reject", `Reject`)}
                   >
@@ -525,8 +583,8 @@ const NoteApproval = ({ navigation, route }) => {
                   </Button>
                 ) : null}
                 <Button
-                  mode="contained"
-                  buttonColor="lightgreen"
+                  variant="contained"
+                  color="success"
                   onClick={() => showModal("recommend", `${ButtonName}`)}
                 >
                   <Typography>{ButtonName}</Typography>
@@ -549,7 +607,7 @@ const NoteApproval = ({ navigation, route }) => {
             >
               <Button
                 style={{ width: "60%", borderRadius: 10 }}
-                mode="contained"
+                variant="contained"
                 buttonColor="skyblue"
                 onClick={() => showModal("compliance")}
               >
@@ -557,18 +615,35 @@ const NoteApproval = ({ navigation, route }) => {
               </Button>
             </div>
           ) : null}
-          <div space="sm" style={{ justifyContent: "space-evenly" }}>
-            <Button onClick={() => setScreenToggle(true)}>Detail</Button>
-            <Button onClick={() => setScreenToggle(false)}>History</Button>
-          </div>
+          <Stack
+            spacing={2}
+            direction="row"
+            style={{ justifyContent: "space-evenly", paddingBottom: "10px" }}
+          >
+            <Button
+              fullWidth
+              variant="text"
+              onClick={() => setScreenToggle(true)}
+            >
+              Detail
+            </Button>
+            <Divider orientation="vertical" variant="middle" flexItem />
+            <Button
+              fullWidth
+              variant="text"
+              onClick={() => setScreenToggle(false)}
+            >
+              History
+            </Button>
+          </Stack>
           <Divider />
           <div>
             {propDetail ? (
               <>
                 {screenToggle ? (
-                  <NoteDetails navigation={navigation} data={propDetail} />
+                  <NoteDetails data={propDetail} />
                 ) : (
-                  <NoteHistory detail={noteHistory} navigation={navigation} />
+                  <NoteHistory detail={noteHistory} />
                 )}
               </>
             ) : null}

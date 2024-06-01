@@ -1,5 +1,6 @@
 import { Avatar, Card, CardActions, CardContent, CardHeader, Typography, Button } from "@mui/material";
 import React from "react";
+import { useRouter } from "next/router";
 const badge = {
   Initiated: { badgeIcon: "I", backGr: "#E9E9E9", badgeStyle: "#545050" },
   Recommended: { badgeIcon: "R", backGr: "#B9F4FF", badgeStyle: "#0398B4" },
@@ -11,7 +12,6 @@ const badge = {
 };
 const CardHistory = ({
   userId,
-  navigation,
   username,
   desig,
   remarkDate,
@@ -20,7 +20,7 @@ const CardHistory = ({
   pdflink,
 }) => {
   // console.log('card USer', status);
-
+  const router=useRouter();
   const LeftContent = (userId, color) => (
     <Avatar
     sx={{bgcolor: color }}
@@ -66,8 +66,8 @@ const CardHistory = ({
         <CardActions>
           <Button
             variant="outlined"
-            onPress={() => {
-              navigation.navigate("Note View", { uri: pdflink });
+            onClick={() => {
+              router.push("../viewNote", { uri: pdflink });
             }}
           >
             View
@@ -77,7 +77,7 @@ const CardHistory = ({
     </Card>
   );
 };
-const NoteHistory = ({ detail, navigation }) => {
+const NoteHistory = ({ detail }) => {
   // console.log(detail);
   return (
     // <ScrollView style={{padding: 20}}>
@@ -94,7 +94,6 @@ const NoteHistory = ({ detail, navigation }) => {
           remark={data.detail}
           status={data.status}
           pdflink={data.supportingDocument}
-          navigation={navigation}
         />
       ))}
       {/* </View> */}

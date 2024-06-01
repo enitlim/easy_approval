@@ -2,7 +2,7 @@ import { Card, Typography, Table, TableHead, TableRow, TableCell,TableBody } fro
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
-const NoteTable = ({ detail, fy, navigation, title }) => {
+const NoteTable = ({ detail, fy, title }) => {
   // console.log('Title : ', title);
 const router=useRouter();
   const tableData = detail;
@@ -27,29 +27,22 @@ const router=useRouter();
      });
    };
   return (
-    <Card>
-      <Typography>{title}</Typography>
+    <Card sx={{ p: 2 }}>
       <Table>
-        <TableHead style={{ bold: true }}>
+        <TableHead>
           <TableRow>
-            <TableCell style={{ flex: 0.5 }}>Note Title</TableCell>
-            <TableCell style={{ flex: 0.15, alignContent: "flex-end" }}>
-              Dept
-            </TableCell>
-            <TableCell numeric style={{ flex: 0.25 }}>
-              Date
-            </TableCell>
-            <TableCell numeric style={{ flex: 0.25 }}>
-              Status
-            </TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Note Title</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Dept</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
           </TableRow>
         </TableHead>
 
         {tableData.map((item, index) => (
           <TableRow key={item.docID} onClick={() => showDetail(item.docID)}>
-              <TableCell style={{ flex: 0.5, justifyContent: "center" }}>
-                {item.title}
-              </TableCell>
+            <TableCell style={{ flex: 0.5, justifyContent: "center" }}>
+              {item.title}
+            </TableCell>
             <TableCell style={{ flex: 0.1, alignContent: "flex-end" }}>
               {item.dept}
             </TableCell>

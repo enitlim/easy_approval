@@ -9,10 +9,10 @@ import {
   TableBody,
   Button
 } from "@mui/material";
-
-const NoteDetails = ({ navigation, data }) => {
+import { useRouter } from "next/router";
+const NoteDetails = ({data }) => {
   // console.log("Inside the Detail: ",data);
-
+const router=useRouter();
   const {
     noteId,
     notetitle,
@@ -29,7 +29,8 @@ const NoteDetails = ({ navigation, data }) => {
     approvedpdf,
   } = data;
   const ViewNote = async (url) => {
-    navigation.navigate("Note View", { uri: url });
+    console.log(url);
+    router.push({pathname:"../viewNote", query:{ uri: url }});
   };
   // console.log(approvedpdf);
   const statusLevel = {
@@ -95,7 +96,7 @@ const NoteDetails = ({ navigation, data }) => {
             <Typography style={noteDetail}>View Note</Typography>
           </TableCell>
           <TableCell style={{ flex: 0.5 }}>
-            <Button mode="contained" onPress={() => ViewNote(notefile)}>
+            <Button mode="contained" onClick={() => ViewNote(notefile)}>
               View
             </Button>
           </TableCell>
@@ -106,7 +107,7 @@ const NoteDetails = ({ navigation, data }) => {
               <Typography style={noteDetail}>View Note Reference</Typography>
             </TableCell>
             <TableCell style={{ flex: 0.5 }}>
-              <Button mode="contained" onPress={() => ViewNote(noteref)}>
+              <Button mode="contained" onClick={() => ViewNote(noteref)}>
                 View
               </Button>
             </TableCell>
@@ -118,7 +119,7 @@ const NoteDetails = ({ navigation, data }) => {
               <Typography style={noteDetail}>View Note Annexures</Typography>
             </TableCell>
             <TableCell style={{ flex: 0.5 }}>
-              <Button mode="contained" onPress={() => ViewNote(noteannex)}>
+              <Button mode="contained" onClick={() => ViewNote(noteannex)}>
                 View
               </Button>
             </TableCell>
@@ -130,7 +131,7 @@ const NoteDetails = ({ navigation, data }) => {
               <Typography style={noteDetail}>View Approved Note</Typography>
             </TableCell>
             <TableCell style={{ flex: 0.5 }}>
-              <Button mode="contained" onPress={() => ViewNote(approvedpdf)}>
+              <Button mode="contained" onClick={() => ViewNote(approvedpdf)}>
                 View
               </Button>
             </TableCell>
@@ -143,7 +144,7 @@ const NoteDetails = ({ navigation, data }) => {
           <TableCell style={{flex: 0.5}}>
             <Button
               mode="contained"
-              onPress={() =>
+              onClick={() =>
                 navigation.navigate('Note PDF', {
                   approver: workflow,
                   noteId: noteId,

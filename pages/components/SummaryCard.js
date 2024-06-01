@@ -5,20 +5,25 @@ const SummaryCard = (props) => {
   return (
     <Card
       variant="outlined"
-      sx={{ backgroundColor: props.bgColor, maxWidth: 200 }}
+      sx={{
+        backgroundColor: props.bgColor,
+        width: "350px", // Set the Card width to 100%
+      }}
     >
-      <Stack space="lg" style={{ justifyContent: "space-between" }}>
-        <Box>
-          <Typography size="xl">{props.heading}</Typography>
+      <Box sx={{ p: 2, width: "100%" }}>
+        {/* Set the Box width to 100% */}
+        <Stack spacing={2} style={{ justifyContent: "space-evenly" }}>
+          <Typography variant="h6">{props.heading}</Typography>
           <Divider style={{ backgroundColor: "black" }} />
           <Typography size="2xl" bold>
             {props.count}
           </Typography>
-        </Box>
-        {/* <Center> */}
-        {/* <Icon as={props.icon} size="xl" /> */}
-        {/* </Center> */}
-      </Stack>
+
+          {/* <Center> */}
+          {/* <Icon as={props.icon} size="xl" /> */}
+          {/* </Center> */}
+        </Stack>
+      </Box>
     </Card>
   );
 };
