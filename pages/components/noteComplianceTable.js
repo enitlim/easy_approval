@@ -1,30 +1,29 @@
-import { Card, Typography, Table, TableHead, TableRow, TableCell,TableBody } from "@mui/material";
+import {
+  Card,
+  Typography,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+} from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
-const NoteTable = ({ detail, fy, title }) => {
-  // console.log('Title : ', title);
-const router=useRouter();
+const NoteComplianceTable = ({ detail, fy, title, totalNote }) => {
+    const router = useRouter();
   const tableData = detail;
 
-
-  const statusLevel = {
-    1: "at CM",
-    2: "at GM",
-    3: "Chairman",
-    4: "Approved",
-    99: "Rejected",
-  };
-  
-   const showDetail = (key) => {
-     console.log(key);
+   const showDetail = (item, detail) => {
+    let jsonItem=JSON.stringify(item)
      router.push({
-       pathname: "/noteApproval",
-       query: { docID: key, fy: fy },
+       pathname: "/complianceDetail",
+       query: { docDetailJSON: jsonItem, completeDocument: detail, fy: fy },
      });
    };
   return (
-    <Card sx={{ p: 2 }}>
+ <Card sx={{ p: 2 }}>
+  <Typography variant="h5" font-weight="bold" sx={{textAlign:"center"}}>{title}</Typography>
       <Table>
         <TableHead>
           <TableRow>
@@ -36,24 +35,27 @@ const router=useRouter();
         </TableHead>
 
         {tableData.map((item, index) => (
-          <TableRow key={item.docID} onClick={() => showDetail(item.docID)}>
+          
+            <TableRow key={item.docID} onClick={() =>  showDetail(item, totalNote)}>
             <TableCell style={{ flex: 0.5, justifyContent: "center" }}>
-              {item.title}
+              {item.noteTitle}
             </TableCell>
             <TableCell style={{ flex: 0.1, alignContent: "flex-end" }}>
-              {item.dept}
+              {item.DeptName}
             </TableCell>
             <TableCell numeric style={{ flex: 0.25, alignContent: "flex-end" }}>
               {item.createdOn.split(",")[0]}
             </TableCell>
             <TableCell style={{ flex: 0.25 }} numeric>
-              {statusLevel[item.level]}
+              {item.chairmanRemark}
             </TableCell>
-          </TableRow>
+            </TableRow>
+            
         ))}
-      </Table>
+
+       </Table>
     </Card>
   );
 };
 
-export default NoteTable;
+export default NoteComplianceTable;

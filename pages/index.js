@@ -14,6 +14,7 @@ import NoteTable from "./components/noteTable";
 import Link from "next/link";
 import AddIcon from "@mui/icons-material/Add";
 import { useRouter } from "next/router";
+import MenuAppBar from "./components/appbar";
 export default function Home() {
   const router = useRouter();
   const { userData } = useSelector((state) => state.user);
@@ -173,17 +174,16 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <MenuAppBar appBarTitle="Home" appBarLink="/" />
       <Box
         sx={{
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-between",
           alignContent: "space-between",
+          marginTop: "80px",
         }}
-      >
-        <h2>Home</h2>
-        <Button onClick={() => signOut(auth)}>Logout</Button>
-      </Box>
+      ></Box>
       <Stack
         direction="column"
         justifyContent="center"
@@ -234,15 +234,14 @@ export default function Home() {
         ) : null}
 
         {pendingNoteData ? (
-          <NoteTable
-            detail={pendingNoteData}
-            fy={FY}
-            title="Pending Notes"
-          />
+          <NoteTable detail={pendingNoteData} fy={FY} title="Pending Notes" />
         ) : null}
-        <Fab color="primary" aria-label="add">
-          <AddIcon onClick={() => router.push("/addNote")} />
-        </Fab>
+        <Box sx={{ position: "fixed", bottom: 16, zIndex: 1000 }}>
+         
+          <Fab color="primary" aria-label="add">
+            <AddIcon onClick={() => router.push("/addNote")} />
+          </Fab>
+        </Box>
       </Stack>
     </>
   );

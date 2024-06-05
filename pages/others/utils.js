@@ -1,331 +1,200 @@
-// import { PermissionsAndroid } from "react-native";
-// import { Alert } from "react-native";
-// import { Buffer } from "buffer";
-// import { PDFDocument, rgb, StandardFonts, degrees } from "pdf-lib";
-// import RNFS from "react-native-fs";
-// import base64 from "base64-js";
-// import storage from "@react-native-firebase/storage";
+import htmlToPdfmake from "html-to-pdfmake";
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
-// export const uriToBlob = (uri) => {
-//   return new Promise((resolve, reject) => {
-//     const xhr = new XMLHttpRequest();
-//     xhr.onload = function () {
-//       resolve(xhr.response);
-//     };
-//     xhr.onerror = function () {
-//       reject(new Error("uriToBlob failed"));
-//     };
-//     xhr.responseType = "blob";
-//     xhr.open("GET", uri, true);
-//     xhr.send(null);
-//   });
-// };
+import { PDFDocument, rgb, StandardFonts, degrees } from "pdf-lib";
+import { Buffer } from "buffer";
+import { ref, getDownloadURL, uploadString } from "firebase/storage";
+import { storage } from "@/firebase/SettingFirebase";
 
-// export const requestStoragePermission = async () => {
-//   try {
-//     const granted = await PermissionsAndroid.request(
-//       PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-//       {
-//         title: "Storage Permission",
-//         message: "App needs access to your storage to upload files.",
-//         buttonNeutral: "Ask Me Later",
-//         buttonNegative: "Cancel",
-//         buttonPositive: "OK",
-//       }
-//     );
-//     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-//       console.log("Storage permission granted");
-//       // Perform your file selection logic here
-//     } else {
-//       console.log("Storage permission denied");
-//     }
-//   } catch (err) {
-//     console.warn(err);
-//   }
-// };
+const generateHTML = (data, notetitle, notedate, noteId, status,logo) => {
+  return `
+    <html>
+      <head>
+        <title>Work Flow</title>
+      </head>
+      <body>
+        <div style="text-align: center;">
+        <img src="${logo}" id="logo" style="width: 500; height: auto;" />
+        <h3>Easy Approval</h3></div>
+        <table style="width:400; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="text-align: center; background-color: lightblue;" colspan="4">Note Details</th>
+            </tr>
+            <tr>
+              <th>Note No:</th><th>${noteId}</th><th style="text-align: center; background-color: lightblue;">STATUS</th>
+              <th style="text-align: center; background-color: lightblue;">${status}</th> 
+            </tr>
+            <tr>
+              <th>SUBJECT:</th>
+              <th colspan="3" style="text-align: left;">${notetitle.toUpperCase()} ON ${notedate}</th>
+            </tr>
+            <tr>
+              <th colspan="4" style="text-align: center; background-color: lightblue;"><h3>AUDIT LOG</h3></th>
+            </tr>
+          </thead>           
+        </table>  
+        <table style=" border-collapse: collapse;">
+          <tbody>
+            ${data
+              .map(
+                (item) => `
+                <tr>
+                  <td style="border: 1px solid black; padding: 8px; word-wrap: break-word;">
+                    ${item.status.toUpperCase()} by ${item.username}(${
+                  item.userId
+                }) ${item.desig} ON ${item.postDate}. <br> Remark: ${
+                  item.detail
+                }
+                  </td>
+                </tr>
+              `
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `;
+};
 
-// export const pickDocument = async () => {
-//   try {
-//     const result = await DocumentPicker.pick({
-//       type: [DocumentPicker.types.allFiles], // Allow all file types
-//     });
-//     console.log("Inisde the pickDoc: ", result);
-//     return result;
-//   } catch (error) {
-//     if (DocumentPicker.isCancel(error)) {
-//       throw new Error("User cancelled document selection.");
-//     } else {
-//       throw new Error(`Error picking document: ${error}`);
-//     }
-//   }
-// };
+const generatePDF = async (approver, notetitle, notedate, noteId, status , logo) => {
+  const htmlContent = generateHTML(
+    approver,
+    notetitle,
+    notedate,
+    noteId,
+    status, logo
+  );
+  const pdfContent = htmlToPdfmake(htmlContent);
 
-// const generateHTML = (data, notetitle, notedate, noteId, status) => {
-//   return `
-//       <html>
-//         <head>
-//           <title>Work Flow</title>
-//           <style>
-//          table {
-//             width: 100%;
-//             border-collapse: collapse;
-//           }
-//           th, td {
-//             border: 1px solid black;
-//             padding: 8px;
-//             text-align: left;
-//             word-wrap: break-word; /* Allow content to wrap within table cells */
-//           }
-//           #logo {
-//             width: 100px; /* Adjust the width of the logo as needed */
-//             height: auto;
-//           }
-//           </style>
-//         </head>
-//         <body>
-//         <img src="https://firebasestorage.googleapis.com/v0/b/tgb-app-e24e1.appspot.com/o/assets%2FCapture.PNG?alt=media&token=8423ee39-47b3-42f6-83f2-4a60ae03cb78" />
-//         <br>
-//           <table>
-//           <thead>
-//           <tr>
-//             <th style='text-align:center; background-color:lightblue' colspan=4>Note Details</th>
-//           </tr>
-//           <tr>   
-//             <th>Note No:</th><th> ${noteId}</th><th  style='text-align:center; background-color:lightblue'>STATUS</th>
-//             <th  style='text-align:center; background-color:lightblue'>${status}</th> 
-//           </tr>
-//           <tr>  <th>SUBJECT:</th>         
-//             <th colspan=3 style='text-align:LEFT'>${notetitle.toUpperCase()} ON  ${notedate}</th>               
-//           </tr>
-//            <tr>           
-//             <th colspan=4 style='text-align:center; background-color:lightblue'><h3>AUDIT LOG</h3></th>               
-//           </tr>
-//             </thead>           
-//           </table>  
-          
-//           <br>
-//           <table>
-           
-//             <tbody>
-//               ${data
-//                 .map(
-//                   (item) => `
-//                 <tr>
-//                 <td>${item.status.toUpperCase()} by ${item.username}(${
-//                     item.userId
-//                   }) ${item.desig} ON ${item.postDate}. <br> Remark: ${
-//                     item.detail
-//                   }</td>                              
-//                 </tr>
-//               `
-//                 )
-//                 .join("")}
-//             </tbody>
-//           </table>
-//         </body>
-//       </html>
-//     `;
-// };
+  const docDefinition = {
+    content: pdfContent,
+    styles: {
+      
+      centered: {
+        alignment: "center",
+      },
+    },
+    // defaultStyle: {
+    //   font: "Helvetica",
+    // },
+   
+  };
 
-// const generatePDF = async (approver, notetitle, notedate, noteId, status) => {
-//   try {
-//     const htmlContent = generateHTML(
-//       approver,
-//       notetitle,
-//       notedate,
-//       noteId,
-//       status
-//     );
-//     // console.log('HTML Content:', htmlContent); // Add this line
-//     console.log("Status", status);
-//     const options = {
-//       html: htmlContent,
-//       fileName: "report",
-//       directory: "Documents",
-//     };
-//     const { filePath } = await RNHTMLtoPDF.convert(options);
-//     // console.log(filePath);
-//     return filePath;
-//   } catch (error) {
-//     console.error("Error generating PDF:", error);
-//   }
-// };
+  // Ensure all tables take full width
+  pdfContent.forEach((item) => {
+    if (item.table) {
+      item.layout = "exampleLayout";
+      item.widths = Array(item.table.body[0].length).fill("*");
+    }
+  });
 
-// export const mergePDFs = async (
-//   note,
-//   annexure,
-//   reference,
-//   approver,
-//   noteId,
-//   notetitle,
-//   notedate,
-//   status
-// ) => {
-//   console.log("Status", status);
+  return new Promise((resolve, reject) => {
+    pdfMake.createPdf(docDefinition).getBase64((data) => {
+      resolve(data);
+    });
+  });
+};
 
-//   let pdfPath;
-//   try {
-//     pdfPath = await generatePDF(approver, notetitle, notedate, noteId, status);
-//     if (!pdfPath) {
-//       Alert.alert("PDF not generated yet!");
-//       return;
-//     }
-//     let noteAnnexDoc;
-//     let noteRefDoc;
-//     // Read the local PDF file
-//     const summaryPdfBytes = await RNFS.readFile(pdfPath, "base64");
-//     const summaryPdfArrayBuffer = base64.toByteArray(summaryPdfBytes).buffer;
+const fetchAndLoadPdf = async (url) => {
+  console.log("URL for the file is here: ",url);
+  const response = await fetch(url);
+  const arrayBuffer = await response.arrayBuffer();
+  return PDFDocument.load(arrayBuffer); //error here
+};
 
-//     // Load the local PDF document
-//     const summaryPdfDoc = await PDFDocument.load(summaryPdfArrayBuffer);
+const embedPages = async (sourceDoc, targetDoc, statusText) => {
+  for (let i = 0; i < sourceDoc.getPageCount(); i++) {
+    const [embeddedPage] = await targetDoc.copyPages(sourceDoc, [i]);
+    const page = targetDoc.addPage(embeddedPage);
+    const { width, height } = page.getSize();
+    const helveticaFont = await targetDoc.embedFont(StandardFonts.Helvetica);
+    page.drawText(statusText, {
+      x: width / 4,
+      y: height / 2,
+      size: 50,
+      font: helveticaFont,
+      color: status === "Approved" ? rgb(0, 1, 0) : rgb(1, 0, 0),
+      opacity: 0.3,
+      rotate: degrees(45),
+    });
+  }
+};
 
-//     //getting the note PDF from URL
-//     const notepdfUrl = note;
-//     const notePdfBytes = await fetch(notepdfUrl).then((res) =>
-//       res.arrayBuffer()
-//     );
-//     // Load the Note PDF document
-//     const notePdfDoc = await PDFDocument.load(notePdfBytes);
-//     if (annexure) {
-//       //getting the note Annexure from URL
-//       const noteAnnexUrl = annexure;
-//       const noteAnnexBytes = await fetch(noteAnnexUrl).then((res) =>
-//         res.arrayBuffer()
-//       );
-//       // Load the Note PDF document
-//       noteAnnexDoc = await PDFDocument.load(noteAnnexBytes);
-//     }
+export const mergePDFs = async (
+  note,
+  annexure,
+  reference,
+  approver,
+  noteId,
+  notetitle,
+  notedate,
+  status, logo 
+) => {
+  try {
+    const summaryPdfBase64 = await generatePDF(
+      approver,
+      notetitle,
+      notedate,
+      noteId,
+      status, logo
+    );
+    const summaryPdfBytes = Buffer.from(summaryPdfBase64, "base64");
+    const summaryPdfDoc = await PDFDocument.load(summaryPdfBytes);
 
-//     if (reference) {
-//       //getting the note Reference from URL
-//       const noteRefUrl = reference;
-//       const noteRefBytes = await fetch(noteRefUrl).then((res) =>
-//         res.arrayBuffer()
-//       );
-//       // Load the Note PDF document
-//       noteRefDoc = await PDFDocument.load(noteRefBytes);
-//     }
+    const pdfDoc = await PDFDocument.create();
 
-//     // Create a new PDF document
-//     const pdfDoc = await PDFDocument.create();
+    await embedPages(
+      summaryPdfDoc,
+      pdfDoc,
+      status === "Approved" ? "Approved Note" : "Rejected Note"
+    );
 
-//     // Iterate over each page of the local PDF document
-//     for (let i = 0; i < summaryPdfDoc.getPageCount(); i++) {
-//       const embeddedPage = await pdfDoc.embedPage(summaryPdfDoc.getPage(i));
-//       const embeddedPageDims = embeddedPage.scale(0.9);
-//       // Add the embedded page to the new PDF document
-//       const page = pdfDoc.addPage();
-//       page.drawPage(embeddedPage, {
-//         ...embeddedPageDims,
-//         x: page.getWidth() / 2 - embeddedPageDims.width / 2,
-//         y: page.getHeight() - embeddedPageDims.height - 30,
-//       });
-//     }
-//     // Iterate over each page of the local PDF document
-//     for (let i = 0; i < notePdfDoc.getPageCount(); i++) {
-//       const embeddedPage = await pdfDoc.embedPage(notePdfDoc.getPage(i));
-//       const embeddedPageDims = embeddedPage.scale(0.9);
-//       // Add the embedded page to the new PDF document
-//       const page = pdfDoc.addPage();
-//       page.drawPage(embeddedPage, {
-//         ...embeddedPageDims,
-//         x: page.getWidth() / 2 - embeddedPageDims.width / 2,
-//         y: page.getHeight() - embeddedPageDims.height - 10,
-//       });
-//       // Add watermark
-//       const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-//       page.drawText(status == "Approved" ? "Approved Note" : "Rejected Note", {
-//         x: 200,
-//         y: 300,
-//         size: 50,
-//         font: helveticaFont,
-//         color: status == "Approved" ? rgb(0, 1, 0) : rgb(1, 0, 0),
-//         opacity: 0.3,
-//         rotate: degrees(45),
-//       });
-//     }
-//     if (annexure) {
-//       for (let i = 0; i < noteAnnexDoc.getPageCount(); i++) {
-//         const embeddedPage = await pdfDoc.embedPage(noteAnnexDoc.getPage(i));
-//         const embeddedPageDims = embeddedPage.scale(0.9);
-//         // Add the embedded page to the new PDF document
-//         const page = pdfDoc.addPage();
-//         page.drawPage(embeddedPage, {
-//           ...embeddedPageDims,
-//           x: page.getWidth() / 2 - embeddedPageDims.width / 2,
-//           y: page.getHeight() - embeddedPageDims.height - 10,
-//         });
-//         // Add watermark
-//         const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-//         page.drawText(
-//           status == "Approved" ? "Approved Annexure" : "Rejected Annexure",
-//           {
-//             x: 200,
-//             y: 300,
-//             size: 50,
-//             font: helveticaFont,
-//             color: status == "Approved" ? rgb(0, 1, 0) : rgb(1, 0, 0),
-//             opacity: 0.3,
-//             rotate: degrees(45),
-//           }
-//         );
-//       }
-//     }
-//     if (reference) {
-//       for (let i = 0; i < noteRefDoc.getPageCount(); i++) {
-//         const embeddedPage = await pdfDoc.embedPage(noteRefDoc.getPage(i));
-//         const embeddedPageDims = embeddedPage.scale(0.9);
-//         // Add the embedded page to the new PDF document
-//         const page = pdfDoc.addPage();
-//         page.drawPage(embeddedPage, {
-//           ...embeddedPageDims,
-//           x: page.getWidth() / 2 - embeddedPageDims.width / 2,
-//           y: page.getHeight() - embeddedPageDims.height - 10,
-//         });
-//         // Add watermark
-//         const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-//         page.drawText(
-//           status == "Approved" ? "Approved Reference" : "Rejected Reference",
-//           {
-//             x: 200,
-//             y: 300,
-//             size: 50,
-//             font: helveticaFont,
-//             color: status == "Approved" ? rgb(0, 1, 0) : rgb(1, 0, 0),
-//             opacity: 0.3,
-//             rotate: degrees(45),
-//           }
-//         );
-//       }
-//     }
+    const notePdfDoc = await fetchAndLoadPdf(note);
+    await embedPages(
+      notePdfDoc,
+      pdfDoc,
+      status === "Approved" ? "Approved Note" : "Rejected Note"
+    );
 
-//     const pdfBytes = await pdfDoc.save();
-//     const base64Pdf = Buffer.from(pdfBytes).toString("base64");
-//     // const source = {
-//     //   uri: `data:application/pdf;base64,${base64Pdf}`,
-//     //   cache: true,
-//     // };
+    if (annexure) {
+      const noteAnnexDoc = await fetchAndLoadPdf(annexure);
+      await embedPages(
+        noteAnnexDoc,
+        pdfDoc,
+        status === "Approved" ? "Approved Annexure" : "Rejected Annexure"
+      );
+    }
 
-//     const storageRef = storage().ref();
-//     const remoteFilePath = `easyApproval/${noteId}`;
-//     const documentRef = storageRef.child(`${remoteFilePath}/Approved_Note`);
-//     try {
-//       // await documentRef.put(blob);
-//       await documentRef.putString(base64Pdf, "base64");
-//       const url = await documentRef.getDownloadURL();
-//       // console.log('Approved note Download URL: ', url);
-//       return url;
-//     } catch (error) {
-//       console.log("Error Uploading Document: ", error);
-//     }
+    if (reference) {
+      const noteRefDoc = await fetchAndLoadPdf(reference);
+      await embedPages(
+        noteRefDoc,
+        pdfDoc,
+        status === "Approved" ? "Approved Reference" : "Rejected Reference"
+      );
+    }
 
-//     Alert.alert("Note saved successfully!");
+    const mergedPdfBytes = await pdfDoc.save();
+    const mergedPdfBase64 = Buffer.from(mergedPdfBytes).toString("base64");
+    // console.log(mergedPdfBase64);
+    const FinalPDF = `data:application/pdf;base64,${mergedPdfBase64}`;
+    const storageRef = ref(storage, `easyApproval/${noteId}/Approved_Note`);
+     await uploadString(storageRef, FinalPDF, "data_url");
+     console.log("Uploaded a blob or file!");
 
-//     //   Alert.alert('PDF downloaded successfully!', `Path: ${mergedPath}`);
-//   } catch (error) {
-//     console.error("Error merging PDFs:", error);
-//   }
-// };
+     // Get the download URL
+     const url = await getDownloadURL(storageRef);
+   
+    return url;
+  } catch (error) {
+    console.error("Error merging PDFs:", error);
+    throw error;
+  }
+};
 export const formatDate = (date) => {
   // Get the day, month, year, hours, minutes, and seconds
   var day = date.getDate();

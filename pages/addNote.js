@@ -23,6 +23,7 @@ import { Stack } from "@mui/system";
 import { useSelector, useDispatch } from "react-redux";
 import { CheckBoxOutlineBlankOutlined } from "@mui/icons-material";
 import { CheckBox } from "@mui/icons-material";
+import MenuAppBar from "./components/appbar";
 const icon = <CheckBoxOutlineBlankOutlined fontSize="small" />;
 const checkedIcon = <CheckBox fontSize="small" />;
 const checkedIcon2 = <CheckBox fontSize="small" />;
@@ -351,17 +352,24 @@ export default function AddNote() {
        });
     }
   };
+   const handleClose = (event, reason) => {
+     if (reason && reason === "backdropClick") {
+       return;
+     }
+     setModvisible(false);
+   };
   return (
     <div style={container}>
-      <Modal open={Modvisible} onClose={() => setModvisible(false)}>
+      <MenuAppBar />
+      <Modal open={Modvisible} onClose={handleClose}>
         <Box sx={modalStyle}>
           <Typography variant="h4">Uploading</Typography>
           <Skeleton></Skeleton>
         </Box>
       </Modal>
 
-      <ToastContainer/>
-    
+      <ToastContainer />
+
       <Typography variant="h4">Add Note {userDept}</Typography>
       <TextField
         fullWidth

@@ -35,7 +35,6 @@ const [toastopen, settoastopen] = useState(false);
   const closeMenu = () => setVisible(false);
   const hideModal = () => triggerfun();
   const containerStyle = { backgroundColor: "white", padding: 20, margin: 20 };
-console.log("Mod Visible :", Modvisible);
 
   let approverList = [];
   if (userData.designation.slice(0, 2) == "Ch" && type == "compliance") {
@@ -81,7 +80,7 @@ console.log("Mod Visible :", Modvisible);
 
   const onFileChange = (e) => {
     setFile(e.target.files[0]);
-    console.log("File DAta: ",file);
+    // console.log("File DAta: ",file);
     uploadFile();
   };
 
@@ -176,7 +175,7 @@ settoastopen(true);
     const addrecord = [
       { status: "compliance" },
       {
-        chairmanRemark: text,
+        chairmanRemark: remarkText,
         createdOn: CreationDate,
         complianceTo: returnTo,
         cmRemark: null,
@@ -269,11 +268,12 @@ settoastopen(true);
             ) : type === "compliance" ? (
               <>
                 <TextField
+                  fullWidth
                   label="Type your message"
                   onChange={(text) => setRemarkText(text.target.value)}
                   variant="outlined"
                   multiline
-                  maxRows={4}
+                  rows={4}
                   style={{ height: 150 }}
                 />
                 <Select
@@ -282,8 +282,8 @@ settoastopen(true);
                   id="demo-simple-select"
                   value={setreturnTo}
                   label="Return to"
-                  onChange={() => {
-                    setreturnTo(data);
+                  onChange={(e) => {
+                    setreturnTo(e.target.value);
                     closeMenu();
                   }}
                 >
@@ -316,7 +316,6 @@ settoastopen(true);
                   onChange={(text) => setRemarkText(text.target.value)}
                   variant="outlined"
                   multiline
-                  maxRows={4}
                   style={{ height: 150 }}
                 />
                 <Select
@@ -359,7 +358,6 @@ settoastopen(true);
                   onChange={(text) => setRemarkText(text.target.value)}
                   variant="outlined"
                   multiline
-                  maxRows={4}
                   style={{ height: 150 }}
                 />
                 <TextField type="file" onChange={onFileChange} />
@@ -382,7 +380,6 @@ settoastopen(true);
                   onChange={(text) => setRemarkText(text.target.value)}
                   variant="outlined"
                   multiline
-                  maxRows={4}
                   style={{ height: 150 }}
                 />
                 <Button
@@ -404,7 +401,6 @@ settoastopen(true);
                   onChange={(text) => setRemarkText(text.target.value)}
                   variant="outlined"
                   multiline
-                  maxRows={4}
                   style={{ height: 150 }}
                 />
                 <Button
@@ -440,7 +436,7 @@ settoastopen(true);
      boxShadow: 24,
      borderRadius:8,
      p: 4,
-     maxHeight: "90vh", // Limit the maximum height of the modal
+     maxHeight: "90vh",
      overflowY: "auto",
    };
 export default NoteModal;

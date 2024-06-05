@@ -7,9 +7,17 @@ import { doc, onSnapshot, getDoc, setDoc } from "firebase/firestore";
 import { useSelector, useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// import { mergePDFs } from "../../../utils";
+import { mergePDFs } from "./others/utils";
 import { useRouter } from "next/router";
-import { Button, Divider, Modal, Skeleton, Stack, Typography } from "@mui/material";
+import {
+  Button,
+  Divider,
+  Modal,
+  Skeleton,
+  Stack,
+  Typography,
+} from "@mui/material";
+import MenuAppBar from "./components/appbar";
 const NoteApproval = () => {
   const router = useRouter();
   const { userData } = useSelector((state) => state.user);
@@ -28,18 +36,8 @@ const NoteApproval = () => {
   const [Modvisible, setModvisible] = useState(false);
 
   const { docID, fy } = router.query;
-  const containerStyle = {
-    backgroundColor: "white",
-    padding: 20,
-    margin: 20,
-    color: "black",
-  };
 
-  console.log("URL: ", docID, fy);
-  docDetails;
-  console.log("docDetails: ", docDetails);
-  console.log("noteHistory: ", noteHistory);
-  console.log("noteApprover: ", noteApprover);
+
   useEffect(() => {
     const getNoteDetails = async () => {
       onSnapshot(doc(db, "easyApproval", "FY", `${fy}`, `${docID}`), (doc) => {
@@ -47,11 +45,11 @@ const NoteApproval = () => {
         setdocDetails(doc?.data());
         setnoteHistory(doc?.data()?.noteHistory);
         setnoteApprover(doc?.data()?.approvers);
-        console.log("Approver Before Loop: ",doc?.data()?.approvers);
+        console.log("Approver Before Loop: ", doc?.data()?.approvers);
         let appArr = [];
         for (let index = 0; index < doc?.data()?.approvers.length; index++) {
           let element = doc?.data().approvers[index];
-          console.log("appArr: ",Object.keys(element));
+          // console.log("appArr: ", Object.keys(element));
           appArr.push(Object.keys(element)[0]);
         }
         setonlyApprover(appArr);
@@ -59,8 +57,8 @@ const NoteApproval = () => {
     };
     getNoteDetails();
   }, []);
-  console.log("Approver Change List", onlyApprover);
-    console.log('Approver Check: ', noteApprover);
+  // console.log("Approver Change List", onlyApprover);
+  // console.log("Approver Check: ", noteApprover);
 
   useEffect(() => {
     if (onlyApprover && noteApprover) {
@@ -164,7 +162,16 @@ const NoteApproval = () => {
   };
   const hideModal = () => setVisible(false);
   // console.log('Upload Data: ', docDetails);
-
+async function urlToBase64(url) {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  const reader = new FileReader();
+  reader.readAsDataURL(blob);
+  return new Promise((resolve, reject) => {
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+  });
+}
   //Data from the Modal. This is where all the operation occurs.
   const dataFromModal = async (data) => {
     setModvisible(true);
@@ -183,10 +190,11 @@ const NoteApproval = () => {
       //    onSnapshot(
       //        doc(db, "easyApproval", "FY", `${fy}`, `${docID}`),
       //        (doc) => {
-      const docData = getDoc(
-        doc(db, "easyApproval", "FY", `${fy}`, "ComplianceNote")
+        console.log("FY : ",fy);
+      const docData = await getDoc(
+        doc(db, "easyApproval", "dashboard", `${fy}`, "ComplianceNote")
       );
-
+      console.log("Compliance Data: ", docData.data());
       if (docData.exists && docData.data().complianceNotes != undefined) {
         complianceNotes = [...docData.data().complianceNotes, ComplianceData];
         await setDoc(
@@ -300,55 +308,31 @@ const NoteApproval = () => {
           });
           if (noteApproved) {
             //Update the PDF code here
-            //Check from here
-            const downloadMergedPdf = async (data) => {
-              try {
-                const mergedPdfBase64 = await mergePDFs(
-                  data.note,
-                  data.annexure,
-                  data.reference,
-                  data.approver,
-                  data.noteId,
-                  data.notetitle,
-                  data.notedate,
-                  data.status
-                );
-
-                const link = document.createElement("a");
-                link.href = `data:application/pdf;base64,${mergedPdfBase64}`;
-                link.download = "merged.pdf";
-                link.click();
-              } catch (error) {
-                console.error("Error:", error);
-              }
-            };
-            // Example usage
-            const data = {
-              note: "note-url",
-              annexure: "annexure-url",
-              reference: "reference-url",
-              approver: approverData,
-              noteId: "noteId",
-              notetitle: "noteTitle",
-              notedate: "noteDate",
-              status: "status",
-            };
-
-            downloadMergedPdf(data);
-            // let approvedPdf = await mergePDFs(
-            //   docDetails.notefile,
-            //   docDetails.noteannex,
-            //   docDetails.noteref,
-            //   newNoteHistory,
-            //   docDetails.noteId,
-            //   docDetails.title,
-            //   docDetails.CreationDate,
-            //   "Approved"
-            // );
-            //updating the main note Document
-            uploadData["level"] = 4;
-            uploadData["approvedPdf"] = approvedPdf;
-            uploadData["Status"] = "Approved";
+      
+            const logo = await urlToBase64(
+              "https://firebasestorage.googleapis.com/v0/b/tgb-app-e24e1.appspot.com/o/assets%2FCapture.PNG?alt=media&token=8423ee39-47b3-42f6-83f2-4a60ae03cb78");
+  
+            try {
+              let approvedPdf = await mergePDFs(
+                docDetails.notefile,
+                docDetails.noteannex,
+                docDetails.noteref,
+                newNoteHistory,
+                docDetails.noteId,
+                docDetails.title,
+                docDetails.CreationDate,
+                "Approved",
+                logo
+              );
+              console.log(approvedPdf);
+              //updating the main note Document
+              uploadData["level"] = 4;
+              uploadData["approvedPdf"] = approvedPdf;
+              uploadData["Status"] = "Approved";
+            } catch (error) {
+              console.error("Error:", error);
+            }
+           
             // for updating the Dashboard note
             notes = noteSummaryData.map((note) => {
               if (note.docID === docID) {
@@ -375,16 +359,21 @@ const NoteApproval = () => {
           });
         }
       } else if (data[0].status === "rejected") {
-        let approvedPdf = await mergePDFs(
-          docDetails.notefile,
-          docDetails.noteannex,
-          docDetails.noteref,
-          newNoteHistory,
-          docDetails.noteId,
-          docDetails.title,
-          docDetails.CreationDate,
-          "Rejected"
-        );
+         const logo = await urlToBase64(
+           "https://firebasestorage.googleapis.com/v0/b/tgb-app-e24e1.appspot.com/o/assets%2FCapture.PNG?alt=media&token=8423ee39-47b3-42f6-83f2-4a60ae03cb78"
+         );
+  
+         let approvedPdf = await mergePDFs(
+           docDetails.notefile,
+           docDetails.noteannex,
+           docDetails.noteref,
+           newNoteHistory,
+           docDetails.noteId,
+           docDetails.title,
+           docDetails.CreationDate,
+           "Rejected",
+           logo
+         );
         let updatedApprover = [];
         //updating the main note Document
         noteApprover.map((data) => {
@@ -442,10 +431,9 @@ const NoteApproval = () => {
         });
       }
 
-      // console.log('Upload Main Note', uploadData);
+      console.log('Upload Main Note', uploadData);
 
       // console.log('Update Dashboard Notes', {notes});
-      // return;
       //Updating the Total Notes Document
       try {
         await setDoc(
@@ -457,6 +445,7 @@ const NoteApproval = () => {
       } catch (error) {
         console.log("Encountered error", error.message);
       }
+
       //Updating the Main Notes Document
       try {
         await setDoc(
@@ -465,35 +454,36 @@ const NoteApproval = () => {
         );
 
         console.log("Updated Successfully");
-         toast.success(" Updated Successfully!", {
-           position: "top-center",
-           autoClose: 5000,
-           hideProgressBar: false,
-           closeOnClick: true,
-           pauseOnHover: true,
-           draggable: true,
-           progress: undefined,
-           theme: "colored",
-         });
+        toast.success(" Updated Successfully!", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
       } catch (error) {
-
         console.log("Encountered error", error.message);
- toast.error(`Error: ${error.message}`, {
-   position: "top-center",
-   autoClose: 5000,
-   hideProgressBar: false,
-   closeOnClick: true,
-   pauseOnHover: true,
-   draggable: true,
-   progress: undefined,
-   theme: "colored",
- });      }
+        toast.error(`Error: ${error.message}`, {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      }
       setModvisible(false);
     }
   };
   // console.log('Showbar', showbar);
   return (
     <div>
+      <MenuAppBar/>
       <Modal visible={Modvisible} onClose={() => Modvisible(false)}>
         {/* <Skeleton variant="circilar" width={20} height={20} /> */}
         <Typography style={{ color: "black", textAlign: "center" }}>
@@ -540,7 +530,7 @@ const NoteApproval = () => {
               <Button
                 style={{ width: "40%", borderRadius: 10 }}
                 mode="contained"
-                buttonColor="skyblue"
+                color="primary"
                 onClick={() => showModal("remark")}
               >
                 Add Remark
@@ -568,7 +558,7 @@ const NoteApproval = () => {
               >
                 <Button
                   variant="contained"
-                  buttonColor="lightblue"
+                  color="primary"
                   onClick={() => showModal("return", "Return")}
                 >
                   Return
@@ -576,7 +566,7 @@ const NoteApproval = () => {
                 {userData.designation === "Chairman" ? (
                   <Button
                     variant="contained"
-                    buttonColor="red"
+                    color="error"
                     onClick={() => showModal("reject", `Reject`)}
                   >
                     <Typography>Reject</Typography>
@@ -595,20 +585,22 @@ const NoteApproval = () => {
           {/* //Buttton to send to compliance */}
           {userData.designation == "Chairman" && docDetails.level == 4 ? (
             <div
-              style={{
+              style={{ 
+                width: "100%",
                 position: "relative",
                 left: 0,
                 right: 0,
                 bottom: 0,
                 // backgroundColor: 'white',
                 padding: 10,
-                alignItems: "center",
+                justifyContent: "center"
               }}
             >
               <Button
-                style={{ width: "60%", borderRadius: 10 }}
+              fullWidth
+                style={{ width: "60%", borderRadius: 10,  }}
                 variant="contained"
-                buttonColor="skyblue"
+               color="primary"
                 onClick={() => showModal("compliance")}
               >
                 <Typography>Send For Compliance</Typography>
