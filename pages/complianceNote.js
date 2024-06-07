@@ -5,23 +5,15 @@ import { Box } from "@mui/material";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/firebase/SettingFirebase";
 import MenuAppBar from "./components/appbar";
+import BottomNavBar from "./components/bottomNavBar";
 const ComplianceNote = ({ navigation }) => {
   const { userData } = useSelector((state) => state.user);
-  console.log("User Data", userData);
+  // console.log("User Data", userData);
   const [noteData, setNoteData] = useState(null); // All Notes
   const [pendingNoteData, setpendingNoteData] = useState([]);
-  const [approvedNoteData, setapprovedNoteData] = useState([]);
   const [totalNoteData, settotalNoteData] = useState([]);
   const [FY, setFY] = useState(null);
-  const noteStatus = Object.freeze({
-    Initiated: 0,
-    CmPending: 1,
-    GmPending: 2,
-    ChPending: 3,
-    Approved: 4,
-    Rejected: -1,
-  });
-
+ 
 
   useEffect(() => {
     const FY = () => {
@@ -76,8 +68,7 @@ const ComplianceNote = ({ navigation }) => {
     };
     Check();
   }, [noteData]);
-  console.log("Pending Note: ", pendingNoteData);
-  console.log("Total Note: ", totalNoteData);
+
   return (
     <>
       <MenuAppBar />
@@ -116,6 +107,7 @@ const ComplianceNote = ({ navigation }) => {
             )}
           </>
         ) : null}
+        <BottomNavBar/>
       </Box>
     </>
   );

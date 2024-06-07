@@ -7,9 +7,10 @@ import { doc, onSnapshot, getDoc, setDoc } from "firebase/firestore";
 import { useSelector, useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { mergePDFs } from "./others/utils";
+import { mergePDFs } from "@/utilities/utils";
 import { useRouter } from "next/router";
 import {
+  Box,
   Button,
   Divider,
   Modal,
@@ -41,11 +42,9 @@ const NoteApproval = () => {
   useEffect(() => {
     const getNoteDetails = async () => {
       onSnapshot(doc(db, "easyApproval", "FY", `${fy}`, `${docID}`), (doc) => {
-        console.log("Fetched Doc: ", doc.data());
         setdocDetails(doc?.data());
         setnoteHistory(doc?.data()?.noteHistory);
         setnoteApprover(doc?.data()?.approvers);
-        console.log("Approver Before Loop: ", doc?.data()?.approvers);
         let appArr = [];
         for (let index = 0; index < doc?.data()?.approvers.length; index++) {
           let element = doc?.data().approvers[index];
@@ -174,7 +173,9 @@ async function urlToBase64(url) {
 }
   //Data from the Modal. This is where all the operation occurs.
   const dataFromModal = async (data) => {
+    console.log("Here");
     setModvisible(true);
+    console.log("ModVisible",Modvisible);
     //if Compliance
     if (data[0].status === "compliance") {
       const ComplianceData = {
@@ -185,11 +186,7 @@ async function urlToBase64(url) {
         DeptName: docDetails.DeptName,
       };
       let complianceNotes = [];
-      // console.log('Compliance Data: ', ComplianceData);
-      //fetch compliance data and merge with the existing data
-      //    onSnapshot(
-      //        doc(db, "easyApproval", "FY", `${fy}`, `${docID}`),
-      //        (doc) => {
+    
         console.log("FY : ",fy);
       const docData = await getDoc(
         doc(db, "easyApproval", "dashboard", `${fy}`, "ComplianceNote")
@@ -208,6 +205,16 @@ async function urlToBase64(url) {
           { complianceNotes }
         );
       }
+        toast.success(" Sent for Compliance!", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
       // const docDataData=
       // console.log("Doc detail: ",docDetails );
       setModvisible(false);
@@ -431,9 +438,9 @@ async function urlToBase64(url) {
         });
       }
 
-      console.log('Upload Main Note', uploadData);
-
+      // console.log('Upload Main Note', uploadData);
       // console.log('Update Dashboard Notes', {notes});
+      
       //Updating the Total Notes Document
       try {
         await setDoc(
@@ -480,15 +487,23 @@ async function urlToBase64(url) {
       setModvisible(false);
     }
   };
-  // console.log('Showbar', showbar);
+
+  const handleClose = (event, reason) => {
+     if (reason && reason === "backdropClick") {
+       return;
+     }
+     setModvisible(false);
+   };
+ 
+     
   return (
     <div>
-      <MenuAppBar/>
-      <Modal visible={Modvisible} onClose={() => Modvisible(false)}>
-        {/* <Skeleton variant="circilar" width={20} height={20} /> */}
-        <Typography style={{ color: "black", textAlign: "center" }}>
-          Updating...
-        </Typography>
+      <MenuAppBar />
+      <Modal open={Modvisible} onClose={handleClose}>
+        <Box sx={modalStyle}>
+          <Typography variant="h4">Uploading</Typography>
+          <Skeleton></Skeleton>
+        </Box>
       </Modal>
       <ToastContainer />
 
@@ -585,7 +600,7 @@ async function urlToBase64(url) {
           {/* //Buttton to send to compliance */}
           {userData.designation == "Chairman" && docDetails.level == 4 ? (
             <div
-              style={{ 
+              style={{
                 width: "100%",
                 position: "relative",
                 left: 0,
@@ -593,14 +608,14 @@ async function urlToBase64(url) {
                 bottom: 0,
                 // backgroundColor: 'white',
                 padding: 10,
-                justifyContent: "center"
+                justifyContent: "center",
               }}
             >
               <Button
-              fullWidth
-                style={{ width: "60%", borderRadius: 10,  }}
+                fullWidth
+                style={{ width: "60%", borderRadius: 10 }}
                 variant="contained"
-               color="primary"
+                color="primary"
                 onClick={() => showModal("compliance")}
               >
                 <Typography>Send For Compliance</Typography>
@@ -645,5 +660,18 @@ async function urlToBase64(url) {
     </div>
   );
 };
-
+const modalStyle = {
+  position: "absolute",
+  top: "45%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "75%",
+  bgcolor: "background.paper",
+  border: "2px solid grey",
+  boxShadow: 24,
+  borderRadius: 8,
+  p: 4,
+  maxHeight: "90vh",
+  overflowY: "auto",
+};
 export default NoteApproval;

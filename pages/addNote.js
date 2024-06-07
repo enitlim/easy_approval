@@ -4,7 +4,7 @@ import { uploadBytes, ref, getDownloadURL } from "firebase/storage";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/router";
-import { formatDate } from "./others/utils";
+import { formatDate } from "@/utilities/utils";
 import { db, storage } from "@/firebase/SettingFirebase";
 import {
   Autocomplete,
@@ -24,6 +24,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { CheckBoxOutlineBlankOutlined } from "@mui/icons-material";
 import { CheckBox } from "@mui/icons-material";
 import MenuAppBar from "./components/appbar";
+import Head from "next/head";
 const icon = <CheckBoxOutlineBlankOutlined fontSize="small" />;
 const checkedIcon = <CheckBox fontSize="small" />;
 const checkedIcon2 = <CheckBox fontSize="small" />;
@@ -58,15 +59,9 @@ export default function AddNote() {
   const [noteID, setNoteID] = useState(null);
   const [FY, setFY] = useState(null);
   const [docID, setDocID] = useState(null);
-  const [visible, setVisible] = useState(false);
   const [Modvisible, setModvisible] = useState(false);
   const [gmlist, setgmlist] = useState([]);
-  const containerStyle = {
-    backgroundColor: "white",
-    padding: 20,
-    margin: 20,
-    color: "black",
-  };
+  
 
   useEffect(() => {
     let temp = [];
@@ -106,14 +101,14 @@ export default function AddNote() {
       let docID = userDept;
       try {
         const curFYValue = FY();
-        console.log("Before Query: ", curFYValue);
-        console.log("USer Dept: ", userDept);
+        // console.log("Before Query: ", curFYValue);
+        // console.log("USer Dept: ", userDept);
 
         const querySnapshot = await getDoc(
           doc(db, "easyApproval", "dashboard", `${curFYValue}`, `${userDept}`)
         );
-        console.log("After Query");
-        console.log("Query Snapshot: ", querySnapshot.data());
+        // console.log("After Query");
+        // console.log("Query Snapshot: ", querySnapshot.data());
         // Check if there are any documents returned by the query
         if (!querySnapshot.empty) {
           const data = querySnapshot.data();
@@ -123,7 +118,7 @@ export default function AddNote() {
           }
         }
       } catch (error) {
-        console.error("Error fetching count:", error);
+        // console.error("Error fetching count:", error);
       }
       setnotecount(countValue);
       setDocID(docID);
@@ -131,7 +126,7 @@ export default function AddNote() {
 
     fetchData();
   }, []);
-  console.log("NoteCount:", notecount);
+  // console.log("NoteCount:", notecount);
   // console.log('FY:', FY);
   useEffect(() => {
     if (notecount && FY) {
@@ -161,11 +156,11 @@ export default function AddNote() {
     try {
       await uploadBytes(storageRef, file);
       //   console.log(snapshot);
-      console.log("Uploaded a blob or file!");
+      // console.log("Uploaded a blob or file!");
 
       // Get the download URL
       const url = await getDownloadURL(storageRef);
-      console.log("File available at", url);
+      // console.log("File available at", url);
       if (noteType === "mainNote") {
         setPdfNote(url);
       } else if (noteType === "noteAnnexure") {
@@ -188,7 +183,7 @@ export default function AddNote() {
       });
     } catch (error) {
       setModvisible(false);
-      console.log(error.message);
+      // console.log(error.message);
       toast.error(`${error.message}`, {
         position: "top-center",
         autoClose: 5000,
@@ -273,18 +268,18 @@ export default function AddNote() {
           );
 
           let newTotalNotes = [];
-          console.log("Getting the Total Notes");
+          // console.log("Getting the Total Notes");
           //fetch the current Detail form this document
           try {
             let totalNoteData = await getDoc(
               doc(db, "easyApproval", "dashboard", `${FY}`, "totalNote")
             );
-            console.log("Main Doc Saved");
+            // console.log("Main Doc Saved");
             // console.log('Pending Note Date : => ', pendingNoteData.data().notes);
             newTotalNotes = totalNoteData.data().notes;
-            console.log("Pending Note Date : => ", newTotalNotes);
+            // console.log("Pending Note Date : => ", newTotalNotes);
           } catch (error) {
-            console.log(error.message);
+            // console.log(error.message);
           }
 
           const totalNote = {
@@ -308,7 +303,7 @@ export default function AddNote() {
           );
 
           //add to the total Note List
-          console.log("Document saved");
+          // console.log("Document saved");
           setModvisible(false);
 
           toast.success("Approval is Raised !", {
@@ -360,6 +355,13 @@ export default function AddNote() {
    };
   return (
     <div style={container}>
+      <Head>
+        <title>Add Note</title>
+        <meta name="description" content="Used for adding the Easy Approval" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* <link rel="icon" href="/favicon.ico" /> */}
+        <link rel="icon" href="/logo-no-background.PNG" />
+      </Head>
       <MenuAppBar />
       <Modal open={Modvisible} onClose={handleClose}>
         <Box sx={modalStyle}>
@@ -388,7 +390,9 @@ export default function AddNote() {
         onChange={(event) => setSelectedApprover(event.target.value)}
       >
         {approversList.map((data) => (
-          <MenuItem value={data}>{data}</MenuItem>
+          <MenuItem key={data} value={data}>
+            {data}
+          </MenuItem>
         ))}
       </Select>
 

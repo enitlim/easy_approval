@@ -17,7 +17,7 @@ const router=useRouter();
   };
   
    const showDetail = (key) => {
-     console.log(key);
+    //  console.log(key);
      router.push({
        pathname: "/noteApproval",
        query: { docID: key, fy: fy },

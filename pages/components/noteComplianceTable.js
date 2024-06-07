@@ -11,19 +11,22 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
 const NoteComplianceTable = ({ detail, fy, title, totalNote }) => {
-    const router = useRouter();
+  const router = useRouter();
   const tableData = detail;
+  const showDetail = (item, detail) => {
+    let completeDoc = JSON?.stringify(detail);
 
-   const showDetail = (item, detail) => {
-    let jsonItem=JSON.stringify(item)
-     router.push({
-       pathname: "/complianceDetail",
-       query: { docDetailJSON: jsonItem, completeDocument: detail, fy: fy },
-     });
-   };
+    let jsonItem = JSON.stringify(item);
+    router.push({
+      pathname: "/complianceDetail",
+      query: { docDetailJSON: jsonItem, completeDocument: completeDoc, fy: fy },
+    });
+  };
   return (
- <Card sx={{ p: 2 }}>
-  <Typography variant="h5" font-weight="bold" sx={{textAlign:"center"}}>{title}</Typography>
+    <Card sx={{ p: 2 }}>
+      <Typography variant="h5" font-weight="bold" sx={{ textAlign: "center" }}>
+        {title}
+      </Typography>
       <Table>
         <TableHead>
           <TableRow>
@@ -35,8 +38,10 @@ const NoteComplianceTable = ({ detail, fy, title, totalNote }) => {
         </TableHead>
 
         {tableData.map((item, index) => (
-          
-            <TableRow key={item.docID} onClick={() =>  showDetail(item, totalNote)}>
+          <TableRow
+            key={item.docID}
+            onClick={() => showDetail(item, totalNote)}
+          >
             <TableCell style={{ flex: 0.5, justifyContent: "center" }}>
               {item.noteTitle}
             </TableCell>
@@ -49,11 +54,9 @@ const NoteComplianceTable = ({ detail, fy, title, totalNote }) => {
             <TableCell style={{ flex: 0.25 }} numeric>
               {item.chairmanRemark}
             </TableCell>
-            </TableRow>
-            
+          </TableRow>
         ))}
-
-       </Table>
+      </Table>
     </Card>
   );
 };

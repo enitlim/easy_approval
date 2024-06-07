@@ -3,6 +3,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector, useDispatch } from "react-redux";
 import ComplianceModal from "./components/complianceModal";
+import { db } from "@/firebase/SettingFirebase";
+import { setDoc, doc } from "firebase/firestore";
 import {
   Box,
   Button,
@@ -20,28 +22,19 @@ import MenuAppBar from "./components/appbar";
 const ComplianceDetail = () => {
   const router = useRouter();
   const { userData } = useSelector((state) => state.user);
-  const [screenToggle, setScreenToggle] = useState(true);
-  const [docDetails, setdocDetails] = useState(null);
-  const [noteHistory, setnoteHistory] = useState(null);
-  const [noteApprover, setnoteApprover] = useState(null);
-  const [onlyApprover, setonlyApprover] = useState(null);
-  const [ButtonName, setButtonName] = useState("Recommend");
-  const [showbar, setshowbar] = useState(false);
+
   const [visible, setVisible] = useState(false);
   const [type, setType] = useState(false);
   const [btn, setbtn] = useState(null);
-  const [propDetail, setpropDetail] = useState(null);
-  const [approvedPdf, setapprovedPdf] = useState(null);
+
   const [Modvisible, setModvisible] = useState(false);
 
   const { docDetailJSON, completeDocument, fy } = router.query;
   const docDetail = JSON.parse(docDetailJSON);
-  const containerStyle = {
-    backgroundColor: "white",
-    padding: 20,
-    margin: 20,
-    color: "black",
-  };
+  let completeDocumentJSON=""
+  completeDocument!=""? completeDocumentJSON = JSON?.parse(completeDocument):null;
+  
+ 
 
   const showModal = (type, btntxt) => {
     setVisible(true);
@@ -54,60 +47,50 @@ const ComplianceDetail = () => {
     query: { uri: url }});
   };
   const hideModal = () => setVisible(false);
-  // console.log('Upload Data: ', docDetails);
 
   //Data from the Modal. This is where all the operation occurs.
   const dataFromModal = async (data) => {
-    // setModvisible(true);
-    // console.log('Data from Compliance Modal : ', data);
-    // console.log('Complete Compliance Modal : ', completeDocument);
-    // console.log("NoteId ",docDetail.noteId);
-    // console.log(fy);
-    let complianceNotes = completeDocument.map((note) => {
+    let complianceNotes = completeDocumentJSON.map((note) => {
       // console.log("Iterated Note : ",note);
       if (note.noteId === docDetail.noteId) {
         return { ...note, ...data };
       }
       return note;
     });
-    // console.log("Updated News : ",complianceNotes);
-    //if Compliance
-    await firestore()
-      .collection("easyApproval")
-      .doc("dashboard")
-      .collection(`${fy}`)
-      .doc("ComplianceNote")
-      .set({ complianceNotes });
-
-    setModvisible(false);
-    toast.show({
-      placement: "top",
-      render: ({ id }) => {
-        const toastId = "toast" + id;
-        return (
-          <CustomToast
-            toastId={toastId}
-            action="success"
-            variant="solid"
-            title="Uploaded"
-            message="Response Submitted successfully"
-          />
-        );
-      },
+    await setDoc(doc(db, "easyApproval", "dashboard", `${fy}`, "ComplianceNote"), {
+      complianceNotes,
     });
+    
+    setModvisible(false);
+toast.success(" Response Submitted Successfully !", {
+  position: "top-center",
+  autoClose: 5000,
+  hideProgressBar: false,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  progress: undefined,
+  theme: "colored",
+});
   };
+
+   const handleClose = (event, reason) => {
+     if (reason && reason === "backdropClick") {
+       return;
+     }
+     setModvisible(false);
+   };
   // console.log('Showbar', showbar);
   return (
     <>
       <MenuAppBar />
-
       <ToastContainer />
-      {/* <Modal open={Modvisible}>
-        <Skeleton />
-        <Typography style={{ color: "black", textAlign: "center" }}>
-          Updating...
-        </Typography>
-      </Modal> */}
+      <Modal open={Modvisible} onClose={handleClose}>
+        <Box sx={modalStyle}>
+          <Typography variant="h4">Uploading</Typography>
+          <Skeleton></Skeleton>
+        </Box>
+      </Modal>
 
       {docDetail ? (
         <ComplianceModal
@@ -118,7 +101,7 @@ const ComplianceDetail = () => {
       ) : null}
       {docDetail ? (
         <Box style={{ flex: 1 }}>
-          <Box p={10}>
+          <Box p={2}>
             <Typography
               sx={{ color: "black", fontWeight: "bold", fontSize: 25 }}
             >
@@ -133,15 +116,15 @@ const ComplianceDetail = () => {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                padding: 10,
+                padding: 2,
                 alignItems: "center",
               }}
             >
               <Button
-                sx={{ width: "70%", borderRadius: 10 }}
-                mode="contained"
-                buttonColor="skyblue"
-                onPress={() => showModal("ackRemark")}
+                sx={{ width: "100%", borderRadius: 10 }}
+                variant="contained"
+                color="primary"
+                onClick={() => showModal("ackRemark")}
               >
                 Acknowledge Remark
               </Button>
@@ -242,5 +225,18 @@ const noteDetail = {
   fontSize: 20,
   color: "black",
 };
-
+const modalStyle = {
+  position: "absolute",
+  top: "45%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "75%",
+  bgcolor: "background.paper",
+  border: "2px solid grey",
+  boxShadow: 24,
+  borderRadius: 8,
+  p: 4,
+  maxHeight: "90vh",
+  overflowY: "auto",
+};
 export default ComplianceDetail;

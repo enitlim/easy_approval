@@ -10,6 +10,7 @@ import Menu from "@mui/material/Menu";
 import { auth } from "@/firebase/SettingFirebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/router";
+import Image from "next/image";
 export default function MenuAppBar({appBarTitle, appBarLink}) {
 
     const router=useRouter();
@@ -29,7 +30,7 @@ export default function MenuAppBar({appBarTitle, appBarLink}) {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 , marginBottom:"80px"}}>
+    <Box sx={{ flexGrow: 1, marginBottom: "80px" }}>
       <AppBar position="absolute">
         <Toolbar>
           {/* <IconButton
@@ -41,7 +42,20 @@ export default function MenuAppBar({appBarTitle, appBarLink}) {
           >
             <MenuIcon />
           </IconButton> */}
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} onClick={()=>{router.push("/")}}>
+          <Image
+            src="/logo-color.PNG"
+            height={50}
+            width={50}
+            // style={{ marginBottom: "10px" }}
+          />
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ flexGrow: 1 }}
+            onClick={() => {
+              router.push("/");
+            }}
+          >
             Easy Approval
           </Typography>
           {authenticated && (
@@ -71,7 +85,13 @@ export default function MenuAppBar({appBarTitle, appBarLink}) {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                <MenuItem onClick={()=>{ router.push("/profilePage")}}>Profile</MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    router.push("/profilePage");
+                  }}
+                >
+                  Profile
+                </MenuItem>
                 <MenuItem onClick={() => signOut(auth)}>Logout</MenuItem>
               </Menu>
             </div>

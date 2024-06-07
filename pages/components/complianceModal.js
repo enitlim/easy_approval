@@ -1,6 +1,6 @@
-import { Button, Modal, TextField } from "@mui/material";
+import { Box, Button, Modal, Skeleton, TextField } from "@mui/material";
 import React, { useState } from "react";
-import { formatDate } from "../others/utils";
+import { formatDate } from "@/utilities/utils";
 
 const ComplianceModal = ({
   visible,
@@ -38,15 +38,16 @@ const ComplianceModal = ({
   };
 
   return (
-      <Modal
-        open={visible}
-        onDismiss={hideModal}
-        contentContainerStyle={containerStyle}
-      >
+    <Modal
+      open={visible}
+      onClose={hideModal}
+    >
+      <Box sx={style}>
         {Modvisible ? (
           <Skeleton />
         ) : (
           <>
+           
             <TextField
               label="Type your message"
               value={text}
@@ -54,28 +55,36 @@ const ComplianceModal = ({
               variant="outlined"
               sx={TextInput}
               multiline
-              row={4}
+              rows={4}
               fullWidth
             />
 
-            <Button
-              sx={margins}
-              variant="outlined"
-              onClick={handleReturn}
-            >
+            <Button  variant="outlined" onClick={handleReturn}>
               Send Compliance Acknowledgement
             </Button>
           </>
         )}
-      </Modal>  );
+      </Box>
+    </Modal>
+  );
 };
-  const margins= {
-    marginTop: 10,
-    marginBottom: 10,
-  }
+
   const TextInput= {
     height: 150,
-    marginTop: 10,
-    marginBottom: 10,
+   
   }
+     const style = {
+       position: "absolute",
+       top: "45%",
+       left: "50%",
+       transform: "translate(-50%, -50%)",
+       width: "75%",
+       bgcolor: "background.paper",
+       border: "2px solid grey",
+       boxShadow: 24,
+       borderRadius: 8,
+       p: 4,
+       maxHeight: "90vh",
+       overflowY: "auto",
+     };
 export default ComplianceModal;

@@ -29,7 +29,6 @@ const router=useRouter();
     approvedpdf,
   } = data;
   const ViewNote = async (url) => {
-    console.log(url);
     router.push({pathname:"../viewNote", query:{ uri: url }});
   };
   // console.log(approvedpdf);

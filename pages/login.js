@@ -13,6 +13,8 @@ import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
+import Head from "next/head";
+import Image from "next/image";
 
 const Login = () => {
   const login = useSelector((state) => state.auth.isLoading);
@@ -68,6 +70,15 @@ const Login = () => {
   // console.log(watch("email"));
   return (
     <>
+      <Head>
+        <title>Easy Approval-Login</title>
+        <meta
+          name="description"
+          content="Used for raising and approving the Easy Approval"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/logo-no-background.PNG" />
+      </Head>
       {isLoading ? (
         <>Loading</>
       ) : (
@@ -93,9 +104,8 @@ const Login = () => {
               alignItems: "center",
             }}
           >
-            <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-              <LockOutlinedIcon />
-            </Avatar>
+            <Image src="/logo-no-background.PNG" height={100} width={100} style={{ marginBottom:"10px" }}/>
+            
             <Typography component="h1" variant="h5">
               Sign IN
             </Typography>
@@ -109,7 +119,7 @@ const Login = () => {
                   required
                   fullWidth
                   id="email"
-                  label="Email Address"
+                  label="User ID"
                   name="email"
                   autoComplete="email"
                   autoFocus
