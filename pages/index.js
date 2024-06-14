@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import SummaryCard from "./components/SummaryCard";
-import { Box, Button, Fab, Stack } from "@mui/material";
+import { Box, Button, Fab, Grid, Stack } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { db } from "@/firebase/SettingFirebase";
 const inter = Inter({ subsets: ["latin"] });
@@ -22,6 +22,7 @@ export default function Home() {
   const [noteData, setNoteData] = useState(null); // All Notes
   const [pendingNoteData, setpendingNoteData] = useState([]);
   const [approvedNoteData, setapprovedNoteData] = useState([]);
+  const [RejectedNoteData, setRejectedNoteData] = useState([]);
   const [totalNoteData, settotalNoteData] = useState([]);
   const [FY, setFY] = useState(null);
   const noteStatus = Object.freeze({
@@ -30,7 +31,7 @@ export default function Home() {
     GmPending: 2,
     ChPending: 3,
     Approved: 4,
-    Rejected: -1,
+    Rejected: 99,
   });
 
   useEffect(() => {
@@ -85,6 +86,16 @@ export default function Home() {
                 )
             )
           );
+            setRejectedNoteData(
+              noteData.filter(
+                (note) =>
+                  note.level == noteStatus.Rejected &&
+                  note.approvers.find(
+                    (approver) =>
+                      Object.keys(approver)[0] === userData.designation
+                  )
+              )
+            );
           settotalNoteData(
             noteData.filter(
               (note) =>
@@ -101,6 +112,9 @@ export default function Home() {
           );
           setapprovedNoteData(
             noteData.filter((note) => note.level == noteStatus.Approved)
+          );
+          setpendingNoteData(
+            noteData.filter((note) => note.level == noteStatus.Rejected)
           );
           settotalNoteData(
             noteData.filter((note) => note.level >= noteStatus.ChPending)
@@ -129,6 +143,16 @@ export default function Home() {
                 )
             )
           );
+           setpendingNoteData(
+             noteData.filter(
+               (note) =>
+                 note.level == noteStatus.Rejected &&
+                 note.approvers.find(
+                   (approver) =>
+                     Object.keys(approver)[0] === userData.designation
+                 )
+             )
+           );
           settotalNoteData(
             noteData.filter(
               (note) =>
@@ -154,6 +178,13 @@ export default function Home() {
                 note.level == noteStatus.Approved
             )
           );
+             setRejectedNoteData(
+               noteData.filter(
+                 (note) =>
+                   note.dept == userData.userDept &&
+                   note.level == noteStatus.Rejected
+               )
+             );
           settotalNoteData(
             noteData.filter((note) => note.dept == userData.userDept)
           );
@@ -175,80 +206,103 @@ export default function Home() {
         <link rel="icon" href="/logo-no-background.PNG" />
       </Head>
       <MenuAppBar appBarTitle="Home" appBarLink="/" />
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignContent: "space-between",
-          marginTop: "80px",
-        }}
-      ></Box>
-      <Stack
-        direction="column"
-        justifyContent="center"
-        alignItems="center"
-        spacing={2}
-      >
-        {totalNoteData ? (
-          <Link
-            style={{ textDecoration: "none" }}
-            href={{
-              pathname: "/ManageNote",
-              query: {
-                notes: JSON.stringify(totalNoteData),
-                title: "Total Notes",
-                FY: FY,
-              },
-            }}
-          >
-            <SummaryCard
-              heading="Total Notes"
-              count={totalNoteData.length}
-              bgColor="lightblue"
-              // icon={StickyNote}
-            />
-          </Link>
-        ) : null}
-
-        {approvedNoteData ? (
-          <Link
-            style={{ textDecoration: "none" }}
-            href={{
-              pathname: "/ManageNote",
-              query: {
-                notes: JSON.stringify(approvedNoteData),
-                title: "Approved Notes",
-                FY: FY,
-              },
-            }}
-          >
-            <SummaryCard
-              heading="Approved"
-              count={approvedNoteData.length}
-              // count="10"
-              bgColor="lightgreen"
-              // icon={CheckCircleIcon}
-            />
-          </Link>
-        ) : null}
-
-        {pendingNoteData ? (
-          <NoteTable detail={pendingNoteData} fy={FY} title="Pending Notes" />
-        ) : null}
-        <BottomNavBar />
-
+      <Box sx={{ paddingRight: 2, paddingLeft:2 }}>
+        <Box sx={{ paddingBottom: 5 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={4}>
+              {totalNoteData ? (
+                <Link
+                  style={{ textDecoration: "none" }}
+                  href={{
+                    pathname: "/ManageNote",
+                    query: {
+                      notes: JSON.stringify(totalNoteData),
+                      title: "Total Notes",
+                      FY: FY,
+                    },
+                  }}
+                >
+                  <SummaryCard
+                    heading="Total Notes"
+                    count={totalNoteData.length}
+                    bgColor="lightblue"
+                    // icon={StickyNote}
+                  />
+                </Link>
+              ) : null}
+            </Grid>
+            <Grid item xs={12} md={4}>
+              {approvedNoteData ? (
+                <Link
+                  style={{ textDecoration: "none" }}
+                  href={{
+                    pathname: "/ManageNote",
+                    query: {
+                      notes: JSON.stringify(approvedNoteData),
+                      title: "Approved Notes",
+                      FY: FY,
+                    },
+                  }}
+                >
+                  <SummaryCard
+                    heading="Approved"
+                    count={approvedNoteData.length}
+                    // count="10"
+                    bgColor="lightgreen"
+                    // icon={CheckCircleIcon}
+                  />
+                </Link>
+              ) : null}
+            </Grid>
+            <Grid item xs={12} md={4}>
+              {RejectedNoteData ? (
+                <Link
+                  style={{ textDecoration: "none" }}
+                  href={{
+                    pathname: "/ManageNote",
+                    query: {
+                      notes: JSON.stringify(RejectedNoteData),
+                      title: "Rejected Notes",
+                      FY: FY,
+                    },
+                  }}
+                >
+                  <SummaryCard
+                    heading="Rejected"
+                    count={RejectedNoteData.length}
+                    // count="10"
+                    bgColor="red"
+                    // icon={CheckCircleIcon}
+                  />
+                </Link>
+              ) : null}
+            </Grid>
+          </Grid>
+        </Box>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            {/* Pending note Data */}
+            {pendingNoteData ? (
+              <NoteTable
+                detail={pendingNoteData}
+                fy={FY}
+                title="Pending Notes"
+              />
+            ) : null}
+            <BottomNavBar />
+          </Grid>
+        </Grid>
         {/* Only Desk office can raise the note */}
         {userData?.designation.slice(0, 2) == "CM" ||
         userData?.designation.slice(0, 2) == "GM" ||
         userData?.designation.slice(0, 2) == "Ch" ? null : (
-          <Box sx={{ position: "fixed", bottom: 16, zIndex: 1000 }}>
+          <Box sx={{ position: "fixed", bottom: 5, zIndex: 1000, right: "45%" }}>
             <Fab color="primary" aria-label="add">
               <AddIcon onClick={() => router.push("/addNote")} />
             </Fab>
           </Box>
         )}
-      </Stack>
+      </Box>
     </>
   );
 }

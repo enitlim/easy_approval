@@ -15,6 +15,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Head from "next/head";
 import Image from "next/image";
+import Logo from "../public/logo-no-background.PNG";
 
 const Login = () => {
   const login = useSelector((state) => state.auth.isLoading);
@@ -104,7 +105,7 @@ const Login = () => {
               alignItems: "center",
             }}
           >
-            <Image src="/logo-no-background.PNG" height={100} width={100} style={{ marginBottom:"10px" }}/>
+            <Image src={Logo} height={100} width={100} style={{ marginBottom:"10px" }} alt="Logo"/>
             
             <Typography component="h1" variant="h5">
               Sign IN

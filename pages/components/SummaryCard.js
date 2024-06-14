@@ -6,8 +6,11 @@ const SummaryCard = (props) => {
     <Card
       variant="outlined"
       sx={{
+      //   marginLeft:2,
+      //   marginRight:2,
+      // marginBottom:2,
         backgroundColor: props.bgColor,
-        width: "350px", // Set the Card width to 100%
+        // Set the Card width to 100%
       }}
     >
       <Box sx={{ p: 2, width: "100%" }}>

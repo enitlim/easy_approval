@@ -40,8 +40,8 @@ const router=useRouter();
     99: "Rejected",
   };
   return (
-    <div style={{ padding: 10 }}>
-      <Table>
+    <div style={{ padding: 5, }}>
+      <Table size="small">
         <TableRow>
           <TableCell style={{ flex: 0.5 }}>
             <Typography style={noteDetail}>Note Number</Typography>
@@ -163,7 +163,7 @@ const router=useRouter();
 // const style = StyleSheet.create({
  const  noteDetail= {
     textAlign: "left",
-    fontSize: 20,
+    fontSize: 14,
     color: "black",
   }
 // });

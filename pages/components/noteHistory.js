@@ -1,4 +1,14 @@
-import { Avatar, Card, CardActions, CardContent, CardHeader, Typography, Button } from "@mui/material";
+import {
+  Avatar,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  Typography,
+  Button,
+  Tooltip,
+  Grid,
+} from "@mui/material";
 import React from "react";
 import { useRouter } from "next/router";
 const badge = {
@@ -6,7 +16,7 @@ const badge = {
   Recommended: { badgeIcon: "R", backGr: "#B9F4FF", badgeStyle: "#0398B4" },
   Approved: { badgeIcon: "A", backGr: "#D6FFAB", badgeStyle: "#59921C" },
   Noted: { badgeIcon: "N", backGr: "#FCFF95", badgeStyle: "#D1D607" },
-  Rejected: { badgeIcon: "R", backGr: "#DDB1B5", badgeStyle: "#9F0412" },
+  Rejected: { badgeIcon: "X", backGr: "#DDB1B5", badgeStyle: "#9F0412" },
   Returned: { badgeIcon: "R", backGr: "#DDB1B5", badgeStyle: "#9F0412" },
   Remarked: { badgeIcon: "I", backGr: "#E9E9E9", badgeStyle: "#545050" },
 };
@@ -20,46 +30,48 @@ const CardHistory = ({
   pdflink,
 }) => {
   // console.log('card USer', status);
-  const router=useRouter();
-  const LeftContent = (userId, color) => (
-    <Avatar
-    sx={{bgcolor: color }}
-      
-    >{userId}
-      </Avatar>
-  );
+  const router = useRouter();
+
   // console.log('Using Null check: ', badge[status]?.badgeStyle);
   return (
-    <Card 
+    <Card
       elevation={3}
       style={{
-        margin: 5,
+        width: "100%",
+        maxWidth: 700,
+        margin: 15,
         paddingBottom: 10,
         backgroundColor: `${badge[status]?.backGr}`,
       }}
     >
-      <CardHeader
-      avatar={
-          <Avatar
-    sx={{bgcolor: badge[status]?.badgeStyle }}
-      
-    >{badge[status]?.badgeIcon}
-      </Avatar>
-     
-        }
-        title={username}
-        subheader={`${userId}- ${desig}`}
-       
-      />
       <CardContent>
-        <Typography variant="titleLarge" style={{ color: "black" }}>
-          Date: {remarkDate}
+        <Grid container spacing={2}>
+          <Grid item xs={3} md={2}>
+            <Tooltip title={status}>
+              <Avatar sx={{ bgcolor: badge[status]?.badgeStyle }}>
+                {badge[status]?.badgeIcon}
+              </Avatar>
+            </Tooltip>
+          </Grid>
+          <Grid item xs={9} md={7}>
+            <Typography variant="subtitle1" style={{ color: "black" }}>
+              {username}
+            </Typography>
+            <Typography variant="subtitle2" style={{ color: "black" }}>
+              {`${userId}- ${desig}`}
+            </Typography>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Typography variant="subtitle2" style={{ color: "black" }}>
+              Date: {remarkDate}
+            </Typography>
+          </Grid>
+        </Grid>
+        <Typography variant="subtitle2" style={{ color: "black" }}>
+          STATUS: {status}
         </Typography>
-        <Typography variant="titleLarge" style={{ color: "black" }}>
+        <Typography variant="button" style={{ color: "black" }}>
           Remarks: {remark}
-        </Typography>
-        <Typography variant="bodyMedium" style={{ color: "black" }}>
-          Status {status}
         </Typography>
       </CardContent>
       {pdflink ? (
@@ -101,10 +113,19 @@ const NoteHistory = ({ detail }) => {
   );
 };
 // const styles = StyleSheet.create({
-  const contentContainer= {
-    paddingVertical: 10,
-    margin: 10,
-    padding: 10,
-  }
+const contentContainer = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 10,
+  margin: 10,
+  padding: 10,
+
+  alignItem: "center",
+  paddingVertical: 10,
+  margin: 10,
+  padding: 10,
+};
 // });
 export default NoteHistory;

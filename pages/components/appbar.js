@@ -11,9 +11,11 @@ import { auth } from "@/firebase/SettingFirebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import Logo from "../../public/logo-no-background.PNG";
+
 export default function MenuAppBar({appBarTitle, appBarLink}) {
 
-    const router=useRouter();
+  const router=useRouter();
   const [authenticated, setAuthenticated] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -33,25 +35,17 @@ export default function MenuAppBar({appBarTitle, appBarLink}) {
     <Box sx={{ flexGrow: 1, marginBottom: "80px" }}>
       <AppBar position="absolute">
         <Toolbar>
-          {/* <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton> */}
           <Image
-            src="/logo-color.PNG"
+            src={Logo}
             height={50}
             width={50}
-            // style={{ marginBottom: "10px" }}
+            style={{ marginRight: "10px" }}
+            alt="logo"
           />
           <Typography
             variant="h6"
             component="div"
-            sx={{ flexGrow: 1 }}
+            sx={{ flexGrow: 1, cursor: "pointer", textAlign: "center" }}
             onClick={() => {
               router.push("/");
             }}

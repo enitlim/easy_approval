@@ -24,8 +24,9 @@ const router=useRouter();
      });
    };
   return (
-    <Card sx={{ p: 2 }}>
-      <Table>
+    <Card sx={{ p: 1, mb: 5, overflowX: "auto", width: "100%" }}>
+      {/* <Typography variant="subtitle1">{title}</Typography> */}
+      <Table size="small">
         <TableHead>
           <TableRow>
             <TableCell sx={{ fontWeight: "bold" }}>Note Title</TableCell>
@@ -36,7 +37,11 @@ const router=useRouter();
         </TableHead>
 
         {tableData.map((item, index) => (
-          <TableRow key={item.docID} onClick={() => showDetail(item.docID)}>
+          <TableRow
+            key={item.docID}
+            onClick={() => showDetail(item.docID)}
+            sx={{ cursor: "pointer" }}
+          >
             <TableCell style={{ flex: 0.5, justifyContent: "center" }}>
               {item.title}
             </TableCell>

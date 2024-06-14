@@ -24,7 +24,7 @@ function ManageNote() {
         >
           {title}
         </Typography>
-        <NoteTable detail={notes} fy={FY} title={title} />
+        <NoteTable detail={notes} fy={FY}/>
       </Box>
     </>
   );
