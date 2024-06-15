@@ -33,7 +33,8 @@ export default function Home() {
     Approved: 4,
     Rejected: 99,
   });
-
+console.log("Total note :", noteData);
+console.log("Pending note :", pendingNoteData);
   useEffect(() => {
     const FY = () => {
       //Calculating Financial Year
@@ -113,13 +114,14 @@ export default function Home() {
           setapprovedNoteData(
             noteData.filter((note) => note.level == noteStatus.Approved)
           );
-          setpendingNoteData(
+          setRejectedNoteData(
             noteData.filter((note) => note.level == noteStatus.Rejected)
           );
           settotalNoteData(
             noteData.filter((note) => note.level >= noteStatus.ChPending)
           );
         } else if (userData.designation.slice(0, 2) === "CM") {
+          console.log(userData.designation);
           setpendingNoteData(
             noteData.filter(
               (note) =>
@@ -143,7 +145,7 @@ export default function Home() {
                 )
             )
           );
-           setpendingNoteData(
+           setRejectedNoteData(
              noteData.filter(
                (note) =>
                  note.level == noteStatus.Rejected &&
@@ -168,7 +170,8 @@ export default function Home() {
             noteData.filter(
               (note) =>
                 note.dept == userData.userDept &&
-                note.level == noteStatus.Initiated
+                note.level == noteStatus.Initiated &&
+                note.createdby == userData.emp_id
             )
           );
           setapprovedNoteData(
@@ -296,7 +299,7 @@ export default function Home() {
         {userData?.designation.slice(0, 2) == "CM" ||
         userData?.designation.slice(0, 2) == "GM" ||
         userData?.designation.slice(0, 2) == "Ch" ? null : (
-          <Box sx={{ position: "fixed", bottom: 5, zIndex: 1000, right: "45%" }}>
+          <Box sx={{ position: "fixed", bottom: 5, zIndex: 1000,  }}>
             <Fab color="primary" aria-label="add">
               <AddIcon onClick={() => router.push("/addNote")} />
             </Fab>

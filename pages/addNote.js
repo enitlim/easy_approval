@@ -292,6 +292,7 @@ export default function AddNote() {
                 createdOn: CreationDate,
                 level: 1,
                 approvers: approvers,
+                createdby: userId,
               },
             ],
           };
@@ -396,7 +397,7 @@ export default function AddNote() {
         ))}
       </Select>
 
-      <Typography style={{ color: "black" }}>Select Recommenders</Typography>
+      <Typography style={{ color: "black" }} gutterBottom>Select Recommenders</Typography>
       <Autocomplete
         multiple
         id="gmlist-checkbox"

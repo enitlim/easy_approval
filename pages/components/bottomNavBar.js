@@ -18,6 +18,7 @@ export default function BottomNavBar() {
     >
       <Box sx={{ width: "100%" }}>
         <BottomNavigation
+        sx={{alignItems:"center"}}
           showLabels
           value={value}
           onChange={(event, newValue) => {

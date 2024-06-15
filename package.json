@@ -30,6 +30,7 @@
     "firebase-admin": "^12.1.1",
     "html-to-pdfmake": "^2.5.9",
     "next": "14.2.3",
+    "next-pwa": "^5.6.0",
     "pdf-lib": "^1.17.1",
     "pdfmake": "^0.2.10",
     "postcss": "^8.4.31",

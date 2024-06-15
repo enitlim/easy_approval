@@ -41,6 +41,9 @@ export default function MenuAppBar({appBarTitle, appBarLink}) {
             width={50}
             style={{ marginRight: "10px" }}
             alt="logo"
+            onClick={() => {
+              router.push("/");
+            }}
           />
           <Typography
             variant="h6"

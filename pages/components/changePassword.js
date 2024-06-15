@@ -65,7 +65,7 @@ const ChangePassword = ({cancelPasswordChange}) => {
   }
   return (
     <div>
-      <ToastContainer/>
+      <ToastContainer />
       <Typography variant="h5" gutterBottom>
         Change Password
       </Typography>
@@ -75,6 +75,7 @@ const ChangePassword = ({cancelPasswordChange}) => {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <TextField
+              fullWidth
               label="Current Password"
               type="password"
               value={currentPassword}
@@ -84,6 +85,7 @@ const ChangePassword = ({cancelPasswordChange}) => {
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
+              fullWidth
               label="New Password"
               type="password"
               value={newPassword}
@@ -92,7 +94,7 @@ const ChangePassword = ({cancelPasswordChange}) => {
             />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <Button variant="contained" type="submit" >
+            <Button variant="contained" type="submit">
               Change Password
             </Button>
           </Grid>

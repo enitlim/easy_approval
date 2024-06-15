@@ -46,6 +46,11 @@ const CardHistory = ({
     >
       <CardContent>
         <Grid container spacing={2}>
+          <Grid item xs={12} md={12}>
+            <Typography variant="subtitle2" style={{ color: "black", textAlign:"right" }}>
+              {remarkDate}
+            </Typography>
+          </Grid>
           <Grid item xs={3} md={2}>
             <Tooltip title={status}>
               <Avatar sx={{ bgcolor: badge[status]?.badgeStyle }}>
@@ -61,15 +66,10 @@ const CardHistory = ({
               {`${userId}- ${desig}`}
             </Typography>
           </Grid>
-          <Grid item xs={12} md={3}>
-            <Typography variant="subtitle2" style={{ color: "black" }}>
-              Date: {remarkDate}
-            </Typography>
-          </Grid>
         </Grid>
-        <Typography variant="subtitle2" style={{ color: "black" }}>
+        {/* <Typography variant="subtitle2" style={{ color: "black" }}>
           STATUS: {status}
-        </Typography>
+        </Typography> */}
         <Typography variant="button" style={{ color: "black" }}>
           Remarks: {remark}
         </Typography>
@@ -79,7 +79,11 @@ const CardHistory = ({
           <Button
             variant="outlined"
             onClick={() => {
-              router.push("../viewNote", { uri: pdflink });
+                  router.push({
+                    pathname: "../viewNote",
+                    query: { uri: pdflink },
+                  });
+
             }}
           >
             View

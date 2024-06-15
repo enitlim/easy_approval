@@ -1,5 +1,6 @@
 /* styles/globals.css */
 html,
 body {
+    touch-action: manipulation;
     overscroll-behavior: none;
 }
