@@ -15,15 +15,16 @@ import AddIcon from "@mui/icons-material/Add";
 import { useRouter } from "next/router";
 import MenuAppBar from "./components/appbar";
 import BottomNavBar from "./components/bottomNavBar";
+import { DashboardCardSkeleton,DashboardTableSkeleton } from "./components/skeletonLoading";
 export default function Home() {
   const router = useRouter();
   const { userData } = useSelector((state) => state.user);
   // console.log("User Data", userData);
   const [noteData, setNoteData] = useState(null); // All Notes
-  const [pendingNoteData, setpendingNoteData] = useState([]);
-  const [approvedNoteData, setapprovedNoteData] = useState([]);
-  const [RejectedNoteData, setRejectedNoteData] = useState([]);
-  const [totalNoteData, settotalNoteData] = useState([]);
+  const [pendingNoteData, setpendingNoteData] = useState(null);
+  const [approvedNoteData, setapprovedNoteData] = useState(null);
+  const [RejectedNoteData, setRejectedNoteData] = useState(null);
+  const [totalNoteData, settotalNoteData] = useState(null);
   const [FY, setFY] = useState(null);
   const noteStatus = Object.freeze({
     Initiated: 0,
@@ -33,8 +34,7 @@ export default function Home() {
     Approved: 4,
     Rejected: 99,
   });
-console.log("Total note :", noteData);
-console.log("Pending note :", pendingNoteData);
+
   useEffect(() => {
     const FY = () => {
       //Calculating Financial Year
@@ -87,16 +87,16 @@ console.log("Pending note :", pendingNoteData);
                 )
             )
           );
-            setRejectedNoteData(
-              noteData.filter(
-                (note) =>
-                  note.level == noteStatus.Rejected &&
-                  note.approvers.find(
-                    (approver) =>
-                      Object.keys(approver)[0] === userData.designation
-                  )
-              )
-            );
+          setRejectedNoteData(
+            noteData.filter(
+              (note) =>
+                note.level == noteStatus.Rejected &&
+                note.approvers.find(
+                  (approver) =>
+                    Object.keys(approver)[0] === userData.designation
+                )
+            )
+          );
           settotalNoteData(
             noteData.filter(
               (note) =>
@@ -145,16 +145,16 @@ console.log("Pending note :", pendingNoteData);
                 )
             )
           );
-           setRejectedNoteData(
-             noteData.filter(
-               (note) =>
-                 note.level == noteStatus.Rejected &&
-                 note.approvers.find(
-                   (approver) =>
-                     Object.keys(approver)[0] === userData.designation
-                 )
-             )
-           );
+          setRejectedNoteData(
+            noteData.filter(
+              (note) =>
+                note.level == noteStatus.Rejected &&
+                note.approvers.find(
+                  (approver) =>
+                    Object.keys(approver)[0] === userData.designation
+                )
+            )
+          );
           settotalNoteData(
             noteData.filter(
               (note) =>
@@ -181,13 +181,13 @@ console.log("Pending note :", pendingNoteData);
                 note.level == noteStatus.Approved
             )
           );
-             setRejectedNoteData(
-               noteData.filter(
-                 (note) =>
-                   note.dept == userData.userDept &&
-                   note.level == noteStatus.Rejected
-               )
-             );
+          setRejectedNoteData(
+            noteData.filter(
+              (note) =>
+                note.dept == userData.userDept &&
+                note.level == noteStatus.Rejected
+            )
+          );
           settotalNoteData(
             noteData.filter((note) => note.dept == userData.userDept)
           );
@@ -196,7 +196,7 @@ console.log("Pending note :", pendingNoteData);
     };
     Check();
   }, [noteData]);
-
+  console.log("Total Notes: ", totalNoteData);
   return (
     <>
       <Head>
@@ -209,10 +209,13 @@ console.log("Pending note :", pendingNoteData);
         <link rel="icon" href="/logo-no-background.PNG" />
       </Head>
       <MenuAppBar appBarTitle="Home" appBarLink="/" />
-      <Box sx={{ paddingRight: 2, paddingLeft:2 }}>
+      <Box sx={{ paddingRight: 2, paddingLeft: 2 }}>
         <Box sx={{ paddingBottom: 5 }}>
           <Grid container spacing={2}>
             <Grid item xs={12} md={4}>
+              {totalNoteData === null
+                ? console.log("Not Empty")
+                : console.log("Empty")}
               {totalNoteData ? (
                 <Link
                   style={{ textDecoration: "none" }}
@@ -232,7 +235,12 @@ console.log("Pending note :", pendingNoteData);
                     // icon={StickyNote}
                   />
                 </Link>
-              ) : null}
+              ) : (
+                <DashboardCardSkeleton
+                  title="Total Notes"
+                  bgColor="lightblue"
+                />
+              )}
             </Grid>
             <Grid item xs={12} md={4}>
               {approvedNoteData ? (
@@ -248,14 +256,19 @@ console.log("Pending note :", pendingNoteData);
                   }}
                 >
                   <SummaryCard
-                    heading="Approved"
+                    heading="Approved Notes"
                     count={approvedNoteData.length}
                     // count="10"
                     bgColor="lightgreen"
                     // icon={CheckCircleIcon}
                   />
                 </Link>
-              ) : null}
+              ) : (
+                <DashboardCardSkeleton
+                  title="Approved Notes"
+                  bgColor="lightgreen"
+                />
+              )}
             </Grid>
             <Grid item xs={12} md={4}>
               {RejectedNoteData ? (
@@ -271,14 +284,16 @@ console.log("Pending note :", pendingNoteData);
                   }}
                 >
                   <SummaryCard
-                    heading="Rejected"
+                    heading="Rejected Notes"
                     count={RejectedNoteData.length}
                     // count="10"
                     bgColor="red"
                     // icon={CheckCircleIcon}
                   />
                 </Link>
-              ) : null}
+              ) : (
+                <DashboardCardSkeleton title="Rejected Notes" bgColor="red" />
+              )}
             </Grid>
           </Grid>
         </Box>
@@ -291,7 +306,7 @@ console.log("Pending note :", pendingNoteData);
                 fy={FY}
                 title="Pending Notes"
               />
-            ) : null}
+            ) : <DashboardTableSkeleton/>}
             <BottomNavBar />
           </Grid>
         </Grid>
@@ -299,7 +314,7 @@ console.log("Pending note :", pendingNoteData);
         {userData?.designation.slice(0, 2) == "CM" ||
         userData?.designation.slice(0, 2) == "GM" ||
         userData?.designation.slice(0, 2) == "Ch" ? null : (
-          <Box sx={{ position: "fixed", bottom: 5, zIndex: 1000,  }}>
+          <Box sx={{ position: "fixed", bottom: 5, zIndex: 1000 }}>
             <Fab color="primary" aria-label="add">
               <AddIcon onClick={() => router.push("/addNote")} />
             </Fab>

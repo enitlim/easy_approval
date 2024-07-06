@@ -33,7 +33,7 @@ const NoteComplianceTable = ({ detail, fy, title, totalNote }) => {
             <TableCell sx={{ fontWeight: "bold" }}>Note Title</TableCell>
             <TableCell sx={{ fontWeight: "bold" }}>Dept</TableCell>
             <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Remark</TableCell>
           </TableRow>
         </TableHead>
 

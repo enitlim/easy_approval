@@ -4,7 +4,9 @@ import BottomNavigation from "@mui/material/BottomNavigation";
 import BottomNavigationAction from "@mui/material/BottomNavigationAction";
 import RestoreIcon from "@mui/icons-material/Restore";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import DescriptionIcon from "@mui/icons-material/Description";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
 import { Paper } from "@mui/material";
 import { useRouter } from "next/router";
 export default function BottomNavBar() {
@@ -18,26 +20,26 @@ export default function BottomNavBar() {
     >
       <Box sx={{ width: "100%" }}>
         <BottomNavigation
-        sx={{alignItems:"center"}}
+          sx={{ alignItems: "center" }}
           showLabels
           value={value}
           onChange={(event, newValue) => {
             console.log("New Value", newValue);
-            console.log("URL: ",window.location.href);
+            console.log("URL: ", window.location.href);
             setValue(newValue);
           }}
         >
           <BottomNavigationAction
             label="Home"
-            icon={<RestoreIcon />}
+            icon={<DescriptionIcon />}
             onClick={() => {
               console.log("Home Clicked");
-              router.push("/")
+              router.push("/");
             }}
           />
           <BottomNavigationAction
             label="Compliance"
-            icon={<FavoriteIcon />}
+            icon={<PrivacyTipIcon />}
             onClick={() => {
               console.log("Compliance Clicked");
               router.push("/complianceNote");

@@ -42,9 +42,11 @@ const ComplianceDetail = () => {
     setbtn(btntxt);
   };
   const ViewNote = async (url) => {
-    router.push({
-      pathname: "./viewNote",
-    query: { uri: url }});
+    const newTabUrl = `${
+      window.location.origin
+    }/viewNote?uri=${encodeURIComponent(url)}`;
+    window.open(newTabUrl, "_blank", "noopener,noreferrer");
+    
   };
   const hideModal = () => setVisible(false);
 
@@ -65,7 +67,7 @@ const ComplianceDetail = () => {
 toast.success(" Response Submitted Successfully !", {
   position: "top-center",
   autoClose: 5000,
-  hideProgressBar: false,
+  hideProgressBar: true,
   closeOnClick: true,
   pauseOnHover: true,
   draggable: true,

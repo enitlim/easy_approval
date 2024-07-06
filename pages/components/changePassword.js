@@ -39,7 +39,7 @@ const ChangePassword = ({cancelPasswordChange}) => {
       toast.success("Password updated successfully!", {
         position: "top-center",
         autoClose: 5000,
-        hideProgressBar: false,
+        hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
@@ -51,7 +51,7 @@ const ChangePassword = ({cancelPasswordChange}) => {
       toast.error(`${error.message}`, {
         position: "top-center",
         autoClose: 5000,
-        hideProgressBar: false,
+        hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,

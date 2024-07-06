@@ -16,6 +16,8 @@ import Typography from "@mui/material/Typography";
 import Head from "next/head";
 import Image from "next/image";
 import Logo from "../public/logo-no-background.PNG";
+import SplashScreen from "./components/splashscreen";
+import { Modal } from "@mui/material";
 
 const Login = () => {
   const login = useSelector((state) => state.auth.isLoading);
@@ -25,6 +27,7 @@ const Login = () => {
   useEffect(() => {
     const loginCheck = async () => {
       if (login === "logged") {
+        //disable the modal
         route.replace("/");
       } else if (login === "noLogged") {
         setisLoading(false);
@@ -46,7 +49,7 @@ const Login = () => {
       toast.success(" Login Success !", {
         position: "top-center",
         autoClose: 5000,
-        hideProgressBar: false,
+        hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
@@ -58,7 +61,7 @@ const Login = () => {
         toast.error(" Wrong Credentials !", {
           position: "top-center",
           autoClose: 5000,
-          hideProgressBar: false,
+          hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
@@ -81,13 +84,13 @@ const Login = () => {
         <link rel="icon" href="/logo-no-background.PNG" />
       </Head>
       {isLoading ? (
-        <>Loading</>
+        <> <SplashScreen logo={Logo}/> </>//Add Splash Screen
       ) : (
         <>
           <ToastContainer
             position="top-center"
             autoClose={5000}
-            hideProgressBar={false}
+            hideProgressBar={true}
             newestOnTop={false}
             closeOnClick
             rtl={false}

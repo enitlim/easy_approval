@@ -141,6 +141,7 @@ const NoteApproval = () => {
         notetitle: docDetails.title,
         doc: docDetails.CreationDate,
         ini: docDetails.CreatedByName,
+        recommender: docDetails.approvers,
         approver: docDetails.approval,
         status: docDetails.Status,
         level: docDetails.level,
@@ -151,6 +152,8 @@ const NoteApproval = () => {
         workflow: noteHistory,
         approvedpdf: docDetails.approvedPdf,
       };
+      console.log("Doc Detail: ", docDetails);
+      console.log("Detail before passing to the Details page: ", detail);
       setpropDetail(detail);
     }
   };
@@ -208,7 +211,7 @@ async function urlToBase64(url) {
         toast.success(" Sent for Compliance!", {
           position: "top-center",
           autoClose: 5000,
-          hideProgressBar: false,
+          hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
@@ -464,7 +467,7 @@ async function urlToBase64(url) {
         toast.success(" Updated Successfully!", {
           position: "top-center",
           autoClose: 5000,
-          hideProgressBar: false,
+          hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
@@ -476,7 +479,7 @@ async function urlToBase64(url) {
         toast.error(`Error: ${error.message}`, {
           position: "top-center",
           autoClose: 5000,
-          hideProgressBar: false,
+          hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
@@ -578,7 +581,8 @@ async function urlToBase64(url) {
                 >
                   Return
                 </Button>
-                {userData.designation === "Chairman" ? (
+                {userData.designation === "Chairman" ||
+                userData.designation.slice(0, 2) === "GM" ? (
                   <Button
                     variant="contained"
                     color="error"
@@ -597,31 +601,7 @@ async function urlToBase64(url) {
               </Stack>
             </div>
           )}
-          {/* //Buttton to send to compliance */}
-          {userData.designation == "Chairman" && docDetails.level == 4 ? (
-            <div
-              style={{
-                width: "100%",
-                position: "relative",
-                left: 0,
-                right: 0,
-                bottom: 0,
-                // backgroundColor: 'white',
-                padding: 10,
-                justifyContent: "center",
-              }}
-            >
-              <Button
-                fullWidth
-                style={{ width: "60%", borderRadius: 10 }}
-                variant="contained"
-                color="primary"
-                onClick={() => showModal("compliance")}
-              >
-                <Typography>Send For Compliance</Typography>
-              </Button>
-            </div>
-          ) : null}
+       
           <Stack
             spacing={2}
             direction="row"
@@ -634,7 +614,7 @@ async function urlToBase64(url) {
             >
               Detail
             </Button>
-            <Divider orientation="vertical" variant="middle" flexItem />
+            {/* <Divider orientation="vertical" variant="middle" flexItem /> */}
             <Button
               fullWidth
               variant="text"
@@ -655,6 +635,30 @@ async function urlToBase64(url) {
               </>
             ) : null}
           </div>
+
+          {/* //Buttton to send to compliance */}
+          {userData.designation == "Chairman" && docDetails.level == 4 ? (
+            <div
+              style={{
+                width: "100%",
+                position: "relative",
+                left: 0,
+                right: 0,
+                bottom: 0,
+                padding: 10,
+                marginTop:10
+              }}
+            >
+              <Button
+                style={{ width: "20%", borderRadius: 10 }}
+                variant="contained"
+                color="success"
+                onClick={() => showModal("compliance")}
+              >
+                <Typography>Send For Compliance</Typography>
+              </Button>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>

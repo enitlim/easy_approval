@@ -58,9 +58,9 @@ const ProfilePage = () => {
                   <Typography variant="subtitle1" gutterBottom>
                     {userData.designation}
                   </Typography>
-                  <Typography variant="body2" color="textSecondary">
+                  {/* <Typography variant="body2" color="textSecondary">
                     {userData.email}
-                  </Typography>
+                  </Typography> */}
                 </Grid>
                 <Grid item xs={12}>
                   <Button variant="outlined" onClick={changeUserPassword}>

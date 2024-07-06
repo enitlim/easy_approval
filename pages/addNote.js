@@ -11,6 +11,9 @@ import {
   Box,
   Button,
   Checkbox,
+  Grid,
+  IconButton,
+  InputAdornment,
   MenuItem,
   Modal,
   Select,
@@ -19,6 +22,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+
 import { Stack } from "@mui/system";
 import { useSelector, useDispatch } from "react-redux";
 import { CheckBoxOutlineBlankOutlined } from "@mui/icons-material";
@@ -29,7 +34,7 @@ const icon = <CheckBoxOutlineBlankOutlined fontSize="small" />;
 const checkedIcon = <CheckBox fontSize="small" />;
 const checkedIcon2 = <CheckBox fontSize="small" />;
 export default function AddNote() {
-  const router=useRouter();
+  const router = useRouter();
   const approversList = [
     "Chairman",
     "GM - I",
@@ -61,7 +66,6 @@ export default function AddNote() {
   const [docID, setDocID] = useState(null);
   const [Modvisible, setModvisible] = useState(false);
   const [gmlist, setgmlist] = useState([]);
-  
 
   useEffect(() => {
     let temp = [];
@@ -148,46 +152,59 @@ export default function AddNote() {
     setFile(e.target.files[0]);
   };
   const uploadDocument = async (noteType) => {
-    setModvisible(true)
-    
-    const remoteFilePath = `easyApproval/${noteID}`;
+    // setModvisible(true);
+    if (file && file.type === "application/pdf") {
+      const remoteFilePath = `easyApproval/${noteID}`;
 
-    const storageRef = ref(storage, `${remoteFilePath}/${noteType}`);
-    try {
-      await uploadBytes(storageRef, file);
-      //   console.log(snapshot);
-      // console.log("Uploaded a blob or file!");
+      const storageRef = ref(storage, `${remoteFilePath}/${noteType}`);
+      try {
+        await uploadBytes(storageRef, file);
+        //   console.log(snapshot);
+        // console.log("Uploaded a blob or file!");
 
-      // Get the download URL
-      const url = await getDownloadURL(storageRef);
-      // console.log("File available at", url);
-      if (noteType === "mainNote") {
-        setPdfNote(url);
-      } else if (noteType === "noteAnnexure") {
-        setReference(url);
-      } else {
-        setAnnexure(url);
+        // Get the download URL
+        const url = await getDownloadURL(storageRef);
+        // console.log("File available at", url);
+        if (noteType === "mainNote") {
+          setPdfNote(url);
+        } else if (noteType === "noteAnnexure") {
+          setAnnexure(url);
+        } else {
+          setReference(url);
+        }
+
+        setModvisible(false);
+        toast.success(" Uploaded !", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      } catch (error) {
+        setModvisible(false);
+        // console.log(error.message);
+        toast.error(`${error.message}`, {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
       }
-      setPdfNote(url);
-
-      setModvisible(false);
-      toast.success(" Uploaded !", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-      });
-    } catch (error) {
+    } else {
       setModvisible(false);
       // console.log(error.message);
-      toast.error(`${error.message}`, {
+      toast.error("Upload PDF file only", {
         position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
+        autoClose: 2000,
+        hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
@@ -309,24 +326,25 @@ export default function AddNote() {
 
           toast.success("Approval is Raised !", {
             position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
+            autoClose: 2000,
+            hideProgressBar: true,
             closeOnClick: true,
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
             theme: "colored",
           });
-          setTimeout(() => {    router.push("/");
-}, 5000);
+          setTimeout(() => {
+            router.push("/");
+          }, 2000);
         }
       } catch (error) {
         // console.log(error.message);
         setModvisible(false);
         toast.success(`${error.message} !`, {
           position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
+          autoClose: 2000,
+          hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
@@ -335,25 +353,25 @@ export default function AddNote() {
         });
       }
     } else {
-       setModvisible(false);
-       toast.warning("Fill All data", {
-         position: "top-center",
-         autoClose: 5000,
-         hideProgressBar: false,
-         closeOnClick: true,
-         pauseOnHover: true,
-         draggable: true,
-         progress: undefined,
-         theme: "colored",
-       });
+      setModvisible(false);
+      toast.warning("Fill All data", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
     }
   };
-   const handleClose = (event, reason) => {
-     if (reason && reason === "backdropClick") {
-       return;
-     }
-     setModvisible(false);
-   };
+  const handleClose = (event, reason) => {
+    if (reason && reason === "backdropClick") {
+      return;
+    }
+    setModvisible(false);
+  };
   return (
     <div style={container}>
       <Head>
@@ -381,23 +399,10 @@ export default function AddNote() {
         //   value={title}
         onChange={(title) => setTitle(title.target.value)}
       />
-      <Typography style={{ color: "black" }}>Select Approver</Typography>
-      <Select
-        fullWidth="true"
-        labelId="demo-simple-select-label"
-        id="demo-simple-select"
-        value={selectedApprover}
-        label="Approver"
-        onChange={(event) => setSelectedApprover(event.target.value)}
-      >
-        {approversList.map((data) => (
-          <MenuItem key={data} value={data}>
-            {data}
-          </MenuItem>
-        ))}
-      </Select>
 
-      <Typography style={{ color: "black" }} gutterBottom>Select Recommenders</Typography>
+      <Typography style={{ color: "black" }} gutterBottom>
+        Select Recommenders
+      </Typography>
       <Autocomplete
         multiple
         id="gmlist-checkbox"
@@ -452,47 +457,109 @@ export default function AddNote() {
           />
         )}
       />
-
-      <Stack space="md">
-        <TextField
-          type="file"
-          accept="application/pdf"
-          onChange={onFileChange}
-        />
-
-        <Button mode="contained" onClick={() => uploadDocument("mainNote")}>
-          Upload Note
-        </Button>
-        <TextField
-          type="file"
-          accept="application/pdf"
-          onChange={onFileChange}
-        />
-
-        <Button mode="contained" onClick={() => uploadDocument("noteAnnexure")}>
-          Upload Annexure
-        </Button>
-        <TextField
-          type="file"
-          accept="application/pdf"
-          onChange={onFileChange}
-        />
-
-        <Button
-          mode="contained"
-          onClick={() => uploadDocument("noteReference")}
-        >
-          Upload Reference
-        </Button>
-
-        <Button
-          variant="contained"
-          onClick={submitAllData}
-          buttonColor="lightgreen"
-        >
-          Submit
-        </Button>
-      </Stack>
+      <Typography style={{ color: "black" }}>Select Approver</Typography>
+      <Select
+        sx={{marginBottom:2}}
+        fullWidth="true"
+        labelId="demo-simple-select-label"
+        id="demo-simple-select"
+        value={selectedApprover}
+        label="Approver"
+        onChange={(event) => setSelectedApprover(event.target.value)}
+      >
+        {approversList.map((data) => (
+          <MenuItem key={data} value={data}>
+            {data}
+          </MenuItem>
+        ))}
+      </Select>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={9}>
+          <TextField
+            fullWidth
+            type="file"
+            inputProps={{ accept: "application/pdf" }}
+            // accept="application/pdf"
+            onChange={onFileChange}
+            InputProps={{
+              endAdornment: pdfNote && (
+                <InputAdornment position="end">
+                  <IconButton edge="end" disabled>
+                    <CheckCircleIcon color="success" />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+        <Grid item xs={12} sm={3}>
+          <Button
+            variant="contained"
+            onClick={() => uploadDocument("mainNote")}
+          >
+            Upload Note
+          </Button>
+        </Grid>
+        <Grid item xs={12} sm={9}>
+          <TextField
+            fullWidth
+            type="file"
+            inputProps={{ accept: "application/pdf" }}
+            onChange={onFileChange}
+            InputProps={{
+              endAdornment: annexure && (
+                <InputAdornment position="end">
+                  <IconButton edge="end" disabled>
+                    <CheckCircleIcon color="success" />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+        <Grid item xs={12} sm={3}>
+          <Button
+            variant="contained"
+            onClick={() => uploadDocument("noteAnnexure")}
+          >
+            Upload Annexure
+          </Button>
+        </Grid>
+        <Grid item xs={12} sm={9}>
+          <TextField
+            fullWidth
+            type="file"
+            inputProps={{ accept: "application/pdf" }}
+            onChange={onFileChange}
+            InputProps={{
+              endAdornment: reference && (
+                <InputAdornment position="end">
+                  <IconButton edge="end" disabled>
+                    <CheckCircleIcon color="success" />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+        <Grid item xs={12} sm={3}>
+          {" "}
+          <Button
+            variant="contained"
+            onClick={() => uploadDocument("noteReference")}
+          >
+            Upload Reference
+          </Button>
+        </Grid>
+      </Grid>
+      <br></br>
+      <Button
+        variant="contained"
+        onClick={submitAllData}
+        buttonColor="lightgreen"
+      >
+        Submit
+      </Button>
     </div>
   );
 }
@@ -520,22 +587,23 @@ const cmlist = [
   { name: "CM - VIG", id: "CM - VIG" },
   { name: "CM - AC", id: "CM - AC" },
   { name: "CM - ADV", id: "CM - ADV" },
-  { name: "CM - Recon", id: "CM - Recon" },
-  { name: "CM - Audit", id: "CM - Audit" },
+  { name: "CM - RECON", id: "CM - RECON" },
+  { name: "CM - AUDIT", id: "CM - AUDIT" },
   { name: "CM - BO", id: "CM - BO" },
-  { name: "CM - PnD", id: "CM - PnD" },
+  { name: "CM - PND", id: "CM - PND" },
+  { name: "CM - FA", id: "CM - FA" },
 ];
-   const modalStyle = {
-     position: "absolute",
-     top: "45%",
-     left: "50%",
-     transform: "translate(-50%, -50%)",
-     width: "75%",
-     bgcolor: "background.paper",
-     border: "2px solid grey",
-     boxShadow: 24,
-     borderRadius: 8,
-     p: 4,
-     maxHeight: "90vh",
-     overflowY: "auto",
-   };
+const modalStyle = {
+  position: "absolute",
+  top: "45%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "75%",
+  bgcolor: "background.paper",
+  border: "2px solid grey",
+  boxShadow: 24,
+  borderRadius: 8,
+  p: 4,
+  maxHeight: "90vh",
+  overflowY: "auto",
+};

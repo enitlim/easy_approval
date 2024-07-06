@@ -1,4 +1,4 @@
-import { Box, Button, MenuItem, Modal, Select, Skeleton, Snackbar, TextField } from "@mui/material";
+import { Box, Button, InputLabel, MenuItem, Modal, Select, Skeleton, Snackbar, TextField } from "@mui/material";
 import React, { useState, useContext } from "react";
 import { storage } from "@/firebase/SettingFirebase";
 import { uploadBytes, ref, getDownloadURL } from "firebase/storage";
@@ -42,10 +42,18 @@ const [toastopen, settoastopen] = useState(false);
       "GM - IT",
       "GM - Vig",
       "CM - IT",
-      "CM - HR",
-      "CM - Credit",
+      "CM - PER",
+      "CM - REC",
       "CM - FI",
-      "CM - Planning",
+      "CM - VIG",
+      "CM - AC",
+      "CM - ADV",
+      "CM - RECON",
+      "CM - AUDIT",
+      "CM - BO",
+      "CM - PND",
+      "CM - FA"
+    
     ];
 
   } else if (userData.designation.slice(0, 2) == "GM") {
@@ -234,11 +242,13 @@ const uploadFile = async () => {
                   rows={4}
                   style={{ height: 150 }}
                 />
+                <InputLabel  id="demo-simple-select-label">Select HOD</InputLabel>
+
                 <Select
                   fullWidth
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
-                  value={setreturnTo}
+                  value={returnTo}
                   label="Return to"
                   onChange={(e) => {
                     setreturnTo(e.target.value);
@@ -256,10 +266,11 @@ const uploadFile = async () => {
                   rows={4}
                   style={margins}
                   disabled
-                  label="Returned to "
+                  label="Send for Compliance to "
                   value={returnTo ? returnTo : "Select whom to return"}
                 />
                 <Button
+                  disabled={returnTo ? false : true}
                   style={margins}
                   variant="outlined"
                   onClick={handleCompliance}
@@ -348,7 +359,6 @@ const uploadFile = async () => {
                   style={{ marginTop: 10 }}
                   color="error"
                   variant="contained"
-                  disabled={remarkText.length > 0 ? false : true}
                   onClick={handleReject}
                 >
                   Submit
@@ -369,7 +379,6 @@ const uploadFile = async () => {
                   style={{ marginTop: 10 }}
                   color="success"
                   variant="contained"
-                  disabled={remarkText.length > 0 ? false : true}
                   onClick={handleRecommended}
                 >
                   Submit
