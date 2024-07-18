@@ -307,9 +307,10 @@ export default function Home() {
                 title="Pending Notes"
               />
             ) : <DashboardTableSkeleton/>}
-            <BottomNavBar />
+            {/* <BottomNavBar /> */}
           </Grid>
         </Grid>
+        {/* Dashboard Here */}
         {/* Only Desk office can raise the note */}
         {userData?.designation.slice(0, 2) == "CM" ||
         userData?.designation.slice(0, 2) == "GM" ||

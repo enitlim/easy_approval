@@ -12,6 +12,8 @@ import { signOut } from "firebase/auth";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Logo from "../../public/logo-no-background.PNG";
+import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
+
 
 export default function MenuAppBar({appBarTitle, appBarLink}) {
 
@@ -53,8 +55,35 @@ export default function MenuAppBar({appBarTitle, appBarLink}) {
               router.push("/");
             }}
           >
+            Home
+          </Typography>
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ flexGrow: 1, textAlign: "center" }}
+          >
             Easy Approval
           </Typography>
+          <Box sx={{ flexGrow: 1 }}>
+            <IconButton
+              aria-label="te"
+              onClick={() => router.push("/complianceNote")}
+            >
+              <PrivacyTipIcon sx={{ color: "red" }} />
+              <Typography
+                variant="h6"
+                component="div"
+                sx={{
+                  cursor: "pointer",
+                  textAlign: "center",
+                  color: "red",
+                }}
+              >
+                Compliance
+              </Typography>
+            </IconButton>
+          </Box>
+
           {authenticated && (
             <div>
               <IconButton

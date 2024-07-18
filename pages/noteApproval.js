@@ -7,7 +7,7 @@ import { doc, onSnapshot, getDoc, setDoc } from "firebase/firestore";
 import { useSelector, useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { mergePDFs } from "@/utilities/utils";
+import { formatDate, mergePDFs } from "@/utilities/utils";
 import { useRouter } from "next/router";
 import {
   Box,
@@ -27,7 +27,9 @@ const NoteApproval = () => {
   const [noteHistory, setnoteHistory] = useState(null);
   const [noteApprover, setnoteApprover] = useState(null);
   const [onlyApprover, setonlyApprover] = useState(null);
-  const [ButtonName, setButtonName] = useState("Recommend");
+  const [ButtonName, setButtonName] = useState("Recommend with Remark");
+  const [ButtonNameWithoutRemark, setButtonNameWithoutRemark] =
+    useState("Recommend");
   const [showbar, setshowbar] = useState(true);
   const [visible, setVisible] = useState(false);
   const [type, setType] = useState(false);
@@ -37,7 +39,6 @@ const NoteApproval = () => {
   const [Modvisible, setModvisible] = useState(false);
 
   const { docID, fy } = router.query;
-
 
   useEffect(() => {
     const getNoteDetails = async () => {
@@ -64,13 +65,17 @@ const NoteApproval = () => {
       //if chairman then check approval
       if (userData.designation === "Chairman") {
         if (docDetails.approval === "Chairman") {
-          setButtonName("Approve");
+          setButtonName("Approve with Remark");
+          setButtonNameWithoutRemark("Approve");
         } else {
-          setButtonName("Noted");
+          setButtonName("Noted  with Remark");
+          setButtonNameWithoutRemark("Noted");
         }
       } else if (userData.designation === docDetails.approval) {
-        setButtonName("Approve");
+        setButtonName("Approve  with Remark");
+        setButtonNameWithoutRemark("Approve");
       }
+      console.log(userData.designation ,"===", docDetails.approval);
       // if (userData.designation === 'Chairman' && docDetails.level === 4) {
       //   setcompliance(true);
       // }
@@ -164,21 +169,48 @@ const NoteApproval = () => {
   };
   const hideModal = () => setVisible(false);
   // console.log('Upload Data: ', docDetails);
-async function urlToBase64(url) {
-  const response = await fetch(url);
-  const blob = await response.blob();
-  const reader = new FileReader();
-  reader.readAsDataURL(blob);
-  return new Promise((resolve, reject) => {
-    reader.onloadend = () => resolve(reader.result);
-    reader.onerror = reject;
-  });
-}
+  async function urlToBase64(url) {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    return new Promise((resolve, reject) => {
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+    });
+  }
+
+  const addWithoutRemark = (btntxt) => {
+    let statusText;
+    if (btntxt == "Approve") {
+      statusText = "Approved";
+    } else if (btntxt == "Noted") {
+      statusText = "Noted";
+    } else {
+      statusText = "Recommended";
+    }
+    const addrecord = [
+      { status: "recommended" },
+      { approveTo: userData.designation },
+      {
+        userId: userData.emp_id,
+        username: userData.emp_name,
+        desig: userData.designation,
+        detail: statusText,
+        postDate: formatDate(new Date()),
+        status: statusText,
+      },
+    ];
+
+    console.log("addrecord: ", addrecord);
+    // return;
+    dataFromModal(addrecord);
+  };
   //Data from the Modal. This is where all the operation occurs.
   const dataFromModal = async (data) => {
     console.log("Here");
     setModvisible(true);
-    console.log("ModVisible",Modvisible);
+    console.log("ModVisible", Modvisible);
     //if Compliance
     if (data[0].status === "compliance") {
       const ComplianceData = {
@@ -189,8 +221,8 @@ async function urlToBase64(url) {
         DeptName: docDetails.DeptName,
       };
       let complianceNotes = [];
-    
-        console.log("FY : ",fy);
+
+      console.log("FY : ", fy);
       const docData = await getDoc(
         doc(db, "easyApproval", "dashboard", `${fy}`, "ComplianceNote")
       );
@@ -208,16 +240,16 @@ async function urlToBase64(url) {
           { complianceNotes }
         );
       }
-        toast.success(" Sent for Compliance!", {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        });
+      toast.success(" Sent for Compliance!", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
       // const docDataData=
       // console.log("Doc detail: ",docDetails );
       setModvisible(false);
@@ -318,10 +350,11 @@ async function urlToBase64(url) {
           });
           if (noteApproved) {
             //Update the PDF code here
-      
+
             const logo = await urlToBase64(
-              "https://firebasestorage.googleapis.com/v0/b/tgb-app-e24e1.appspot.com/o/assets%2FCapture.PNG?alt=media&token=8423ee39-47b3-42f6-83f2-4a60ae03cb78");
-  
+              "https://firebasestorage.googleapis.com/v0/b/tgb-app-e24e1.appspot.com/o/assets%2FCapture.PNG?alt=media&token=8423ee39-47b3-42f6-83f2-4a60ae03cb78"
+            );
+
             try {
               let approvedPdf = await mergePDFs(
                 docDetails.notefile,
@@ -342,7 +375,7 @@ async function urlToBase64(url) {
             } catch (error) {
               console.error("Error:", error);
             }
-           
+
             // for updating the Dashboard note
             notes = noteSummaryData.map((note) => {
               if (note.docID === docID) {
@@ -369,21 +402,21 @@ async function urlToBase64(url) {
           });
         }
       } else if (data[0].status === "rejected") {
-         const logo = await urlToBase64(
-           "https://firebasestorage.googleapis.com/v0/b/tgb-app-e24e1.appspot.com/o/assets%2FCapture.PNG?alt=media&token=8423ee39-47b3-42f6-83f2-4a60ae03cb78"
-         );
-  
-         let approvedPdf = await mergePDFs(
-           docDetails.notefile,
-           docDetails.noteannex,
-           docDetails.noteref,
-           newNoteHistory,
-           docDetails.noteId,
-           docDetails.title,
-           docDetails.CreationDate,
-           "Rejected",
-           logo
-         );
+        const logo = await urlToBase64(
+          "https://firebasestorage.googleapis.com/v0/b/tgb-app-e24e1.appspot.com/o/assets%2FCapture.PNG?alt=media&token=8423ee39-47b3-42f6-83f2-4a60ae03cb78"
+        );
+
+        let approvedPdf = await mergePDFs(
+          docDetails.notefile,
+          docDetails.noteannex,
+          docDetails.noteref,
+          newNoteHistory,
+          docDetails.noteId,
+          docDetails.title,
+          docDetails.CreationDate,
+          "Rejected",
+          logo
+        );
         let updatedApprover = [];
         //updating the main note Document
         noteApprover.map((data) => {
@@ -441,9 +474,9 @@ async function urlToBase64(url) {
         });
       }
 
-      // console.log('Upload Main Note', uploadData);
-      // console.log('Update Dashboard Notes', {notes});
-      
+      console.log("Upload Main Note", uploadData);
+      console.log("Update Dashboard Notes", { notes });
+
       //Updating the Total Notes Document
       try {
         await setDoc(
@@ -492,13 +525,12 @@ async function urlToBase64(url) {
   };
 
   const handleClose = (event, reason) => {
-     if (reason && reason === "backdropClick") {
-       return;
-     }
-     setModvisible(false);
-   };
- 
-     
+    if (reason && reason === "backdropClick") {
+      return;
+    }
+    setModvisible(false);
+  };
+
   return (
     <div>
       <MenuAppBar />
@@ -594,6 +626,13 @@ async function urlToBase64(url) {
                 <Button
                   variant="contained"
                   color="success"
+                  onClick={() => addWithoutRemark(ButtonNameWithoutRemark)}
+                >
+                  <Typography>{ButtonNameWithoutRemark}</Typography>
+                </Button>
+                <Button
+                  variant="contained"
+                  color="success"
                   onClick={() => showModal("recommend", `${ButtonName}`)}
                 >
                   <Typography>{ButtonName}</Typography>
@@ -601,7 +640,7 @@ async function urlToBase64(url) {
               </Stack>
             </div>
           )}
-       
+
           <Stack
             spacing={2}
             direction="row"
@@ -646,7 +685,7 @@ async function urlToBase64(url) {
                 right: 0,
                 bottom: 0,
                 padding: 10,
-                marginTop:10
+                marginTop: 10,
               }}
             >
               <Button

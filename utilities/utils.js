@@ -18,7 +18,7 @@ const generateHTML = (data, notetitle, notedate, noteId, status,logo) => {
         <div style="text-align: center;">
         <img src="${logo}" id="logo" style="width: 500; height: auto;" />
         <h3>Easy Approval</h3></div>
-        <table style="width:400; border-collapse: collapse;">
+        <table style="width:'100%'; border-collapse: collapse;">
           <thead>
             <tr>
               <th style="text-align: center; background-color: lightblue;" colspan="4">Note Details</th>
@@ -29,7 +29,7 @@ const generateHTML = (data, notetitle, notedate, noteId, status,logo) => {
             </tr>
             <tr>
               <th>SUBJECT:</th>
-              <th colspan="3" style="text-align: left;">${notetitle.toUpperCase()} ON ${notedate}</th>
+              <th colspan="3" style="text-align: left;">${notetitle.toUpperCase()}</th>
             </tr>
             <tr>
               <th colspan="4" style="text-align: center; background-color: lightblue;"><h3>AUDIT LOG</h3></th>
@@ -114,7 +114,7 @@ const embedPages = async (sourceDoc, targetDoc, statusText) => {
     const helveticaFont = await targetDoc.embedFont(StandardFonts.Helvetica);
     page.drawText(statusText, {
       x: width / 4,
-      y: height / 2,
+      y: height / 4,
       size: 50,
       font: helveticaFont,
       color: status === "Approved" ? rgb(0, 1, 0) : rgb(1, 0, 0),
